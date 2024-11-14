@@ -21,7 +21,7 @@ susceptible = [S]
 infected = [I]
 recovered = [R]
 
-num_days = 300
+num_days = st.slider("Simulation duration (days):", min_value=1, max_value=500, value=300)
 
 for _ in range(num_days):
     S_new = S - beta * S * I / N
