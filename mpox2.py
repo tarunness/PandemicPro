@@ -212,10 +212,10 @@ elif model_option == "SEIR Model":
 
 elif model_option == "Neo-Dynamic Model":
     R0 = st.number_input("Enter the initial number of recovered individuals:", min_value=0, value=0)
-    beta_0 = st.number_input("Enter the baseline infection rate (beta_0):", min_value=0.0, value=0.3)
-    beta_hr = st.number_input("Enter the high-risk infection rate (beta_hr):", min_value=0.0, value=0.5)
-    f_hr = st.number_input("Enter the fraction of high-risk individuals (f_hr):", min_value=0.0, max_value=1.0, value=0.1)
-    gamma = st.number_input("Enter the recovery rate (gamma):", min_value=0.0, value=0.1)
+    beta_0 = st.number_input("Enter the baseline infection rate:", min_value=0.0, value=0.3)
+    beta_hr = st.number_input("Enter the high-risk infection rate:", min_value=0.0, value=0.5)
+    f_hr = st.number_input("Enter the fraction of high-risk individuals:", min_value=0.0, max_value=1.0, value=0.1)
+    gamma = st.number_input("Enter the recovery rate:", min_value=0.0, value=0.1)
     
     susceptible, infected, recovered = neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days)
     
