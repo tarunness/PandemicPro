@@ -3,12 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-# Function for the Neo-Dynamic Model
-def neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days):
-    S = N - I0 - R0
+def neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, num_days):
+    S = N - I0 - R0 - D0  # Account for deceased individuals
     I = I0
     R = R0
-    D = 0
+    D = D0  # Start with an initial number of deceased individuals
 
     susceptible = [S]
     infected = [I]
@@ -17,7 +16,7 @@ def neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days):
 
     # Effective transmission rate due to high-risk group interactions
     beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
-    
+
     for _ in range(num_days):
         S_new = S - beta_eff * S * I / N
         I_new = I + beta_eff * S * I / N - gamma * I - delta * I
@@ -31,7 +30,7 @@ def neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days):
         recovered.append(R)
         deceased.append(D)
 
-    return susceptible, infected, recovered
+    return susceptible, infected, recovered, deceased
 
 # Function for the SIR Model
 def sir_model(N, I0, R0, beta, gamma, num_days):
