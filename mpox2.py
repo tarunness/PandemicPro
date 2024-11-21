@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import streamlit as st
 
-# Function for the Neo-Dynamic SIRD Model
-def neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, num_days):
+# Modified Neo-Dynamic SIRD Model with Vaccination
+def neo_dynamic_sird_model_with_vaccination(
+    N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, v, e, num_days
+):
     S = N - I0 - R0 - D0  # Account for deceased individuals
     I = I0
     R = R0
@@ -19,9 +20,14 @@ def neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, n
     beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
 
     for _ in range(num_days):
-        S_new = S - beta_eff * S * I / N
+        # Vaccination effect
+        vaccinated = v * S  # Number of vaccinated individuals per day
+        directly_immune = vaccinated * e  # Vaccinated individuals gaining full immunity
+        partially_immune = vaccinated * (1 - e)  # Remaining partially immune population
+
+        S_new = S - beta_eff * S * I / N - vaccinated  # Remove vaccinated from susceptible
         I_new = I + beta_eff * S * I / N - gamma * I - delta * I
-        R_new = R + gamma * I
+        R_new = R + gamma * I + directly_immune  # Add directly immune to recovered
         D_new = D + delta * I
 
         S, I, R, D = S_new, I_new, R_new, D_new
@@ -31,7 +37,7 @@ def neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, n
         recovered.append(R)
         deceased.append(D)
 
-    return susceptible, infected, recovered, deceased
+    return susceptible, infected, recovered, deceasedd
 
 # Function for the SIR Model
 def sir_model(N, I0, R0, beta, gamma, num_days):
@@ -131,9 +137,11 @@ def seir_model(N, E0, I0, R0, beta, gamma, alpha, num_days):
 
 # Streamlit page setup
 st.title("Epidemiological Models")
+
+# Sidebar for model selection
 model_option = st.sidebar.selectbox(
     "Choose a model",
-    ("SIR Model", "SIRD Model", "SIS Model", "SEIR Model", "Neo-Dynamic Model")
+    ("SIR Model", "SIRD Model", "SIS Model", "SEIR Model", "Neo-Dynamic Model with Vaccination")
 )
 
 # Common inputs
@@ -142,7 +150,7 @@ N = st.number_input("Enter the total population:", min_value=1, value=1000000)
 I0 = st.number_input("Enter the initial number of infected individuals:", min_value=0, value=1)
 num_days = st.slider("Simulation duration (days):", min_value=1, max_value=500, value=300)
 
-# Model-specific inputs and plots
+# Model-specific inputs and plotting
 if model_option == "SIR Model":
     R0 = st.number_input("Enter the initial number of recovered individuals:", min_value=0, value=0)
     beta = st.number_input("Enter the infection rate (beta):", min_value=0.0, value=0.3)
@@ -157,7 +165,6 @@ if model_option == "SIR Model":
         "Recovered": recovered
     })
     
-    # Plotting
     st.line_chart(data)
 
 elif model_option == "SIRD Model":
@@ -168,7 +175,6 @@ elif model_option == "SIRD Model":
     
     susceptible, infected, recovered, deceased = sird_model(N, I0, R0, beta, gamma, delta, num_days)
     
-    # Convert to DataFrame for plotting
     data = pd.DataFrame({
         "Susceptible": susceptible,
         "Infected": infected,
@@ -176,7 +182,6 @@ elif model_option == "SIRD Model":
         "Deceased": deceased
     })
     
-    # Plotting
     st.line_chart(data)
 
 elif model_option == "SIS Model":
@@ -185,13 +190,11 @@ elif model_option == "SIS Model":
     
     susceptible, infected = sis_model(N, I0, beta, gamma, num_days)
     
-    # Convert to DataFrame for plotting
     data = pd.DataFrame({
         "Susceptible": susceptible,
         "Infected": infected
     })
     
-    # Plotting
     st.line_chart(data)
 
 elif model_option == "SEIR Model":
@@ -203,7 +206,6 @@ elif model_option == "SEIR Model":
     
     susceptible, exposed, infected, recovered = seir_model(N, E0, I0, R0, beta, gamma, alpha, num_days)
     
-    # Convert to DataFrame for plotting
     data = pd.DataFrame({
         "Susceptible": susceptible,
         "Exposed": exposed,
@@ -211,10 +213,9 @@ elif model_option == "SEIR Model":
         "Recovered": recovered
     })
     
-    # Plotting
     st.line_chart(data)
 
-elif model_option == "Neo-Dynamic Model":
+elif model_option == "Neo-Dynamic Model with Vaccination":
     R0 = st.number_input("Enter the initial number of recovered individuals:", min_value=0, value=0)
     D0 = st.number_input("Enter the initial number of deceased individuals:", min_value=0, value=0)
     beta_0 = st.number_input("Enter the baseline infection rate:", min_value=0.0, value=0.3)
@@ -222,9 +223,13 @@ elif model_option == "Neo-Dynamic Model":
     f_hr = st.number_input("Enter the fraction of high-risk individuals:", min_value=0.0, max_value=1.0, value=0.1)
     gamma = st.number_input("Enter the recovery rate:", min_value=0.0, value=0.1)
     delta = st.number_input("Enter the death rate (delta):", min_value=0.0, value=0.01)
-    
-    susceptible, infected, recovered, deceased = neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, num_days)
-    
+    v = st.number_input("Enter the vaccination rate (fraction of susceptible vaccinated per day):", min_value=0.0, max_value=1.0, value=0.01)
+    e = st.number_input("Enter the vaccine effectiveness (fraction gaining immunity):", min_value=0.0, max_value=1.0, value=0.9)
+
+    susceptible, infected, recovered, deceased = neo_dynamic_sird_model_with_vaccination(
+        N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, v, e, num_days
+    )
+
     # Convert to DataFrame for plotting
     data = pd.DataFrame({
         "Susceptible": susceptible,
@@ -232,6 +237,6 @@ elif model_option == "Neo-Dynamic Model":
         "Recovered": recovered,
         "Deceased": deceased
     })
-    
+
     # Plotting
     st.line_chart(data)
