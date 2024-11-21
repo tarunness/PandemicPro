@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
+# Function for the Neo-Dynamic SIRD Model
 def neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, num_days):
     S = N - I0 - R0 - D0  # Account for deceased individuals
     I = I0
@@ -215,20 +216,21 @@ elif model_option == "SEIR Model":
 
 elif model_option == "Neo-Dynamic Model":
     R0 = st.number_input("Enter the initial number of recovered individuals:", min_value=0, value=0)
+    D0 = st.number_input("Enter the initial number of deceased individuals:", min_value=0, value=0)
     beta_0 = st.number_input("Enter the baseline infection rate:", min_value=0.0, value=0.3)
     beta_hr = st.number_input("Enter the high-risk infection rate:", min_value=0.0, value=0.5)
     f_hr = st.number_input("Enter the fraction of high-risk individuals:", min_value=0.0, max_value=1.0, value=0.1)
     gamma = st.number_input("Enter the recovery rate:", min_value=0.0, value=0.1)
+    delta = st.number_input("Enter the death rate (delta):", min_value=0.0, value=0.01)
     
-    susceptible, infected, recovered = neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days)
+    susceptible, infected, recovered, deceased = neo_dynamic_sird_model(N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, num_days)
     
     # Convert to DataFrame for plotting
     data = pd.DataFrame({
         "Susceptible": susceptible,
         "Infected": infected,
-
-
-        "Recovered": recovered
+        "Recovered": recovered,
+        "Deceased": deceased
     })
     
     # Plotting
