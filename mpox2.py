@@ -8,26 +8,28 @@ def neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days):
     S = N - I0 - R0
     I = I0
     R = R0
+    D = 0
 
     susceptible = [S]
     infected = [I]
     recovered = [R]
+    deceased = [D]
 
     # Effective transmission rate due to high-risk group interactions
     beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
-
+    
     for _ in range(num_days):
         S_new = S - beta_eff * S * I / N
-        I_new = I + beta_eff * S * I / N - gamma * I
+        I_new = I + beta_eff * S * I / N - gamma * I - delta * I
         R_new = R + gamma * I
+        D_new = D + delta * I
 
-        S, I, R = S_new, I_new, R_new
+        S, I, R, D = S_new, I_new, R_new, D_new
 
         susceptible.append(S)
         infected.append(I)
         recovered.append(R)
-
-    return susceptible, infected, recovered
+        deceased.append(D)
 
 # Function for the SIR Model
 def sir_model(N, I0, R0, beta, gamma, num_days):
