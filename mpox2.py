@@ -31,6 +31,8 @@ def neo_dynamic_model(N, I0, R0, beta_0, beta_hr, f_hr, gamma, num_days):
         recovered.append(R)
         deceased.append(D)
 
+    return susceptible, infected, recovered
+
 # Function for the SIR Model
 def sir_model(N, I0, R0, beta, gamma, num_days):
     S = N - I0 - R0
