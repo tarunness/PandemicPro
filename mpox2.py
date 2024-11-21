@@ -37,7 +37,7 @@ def neo_dynamic_sird_model_with_vaccination(
         recovered.append(R)
         deceased.append(D)
 
-    return susceptible, infected, recovered, deceasedd
+    return susceptible, infected, recovered, deceased
 
 # Function for the SIR Model
 def sir_model(N, I0, R0, beta, gamma, num_days):
