@@ -8,3 +8,15 @@ numpy
 pandas
 matplotlib
 seaborn
+json
+datetime
+time
+sklearn
+warnings
+io
+smtplib
+email.mime.text
+email.mime.multipart
+gspread
+google.oauth.service_account
+
