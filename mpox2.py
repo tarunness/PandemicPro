@@ -581,38 +581,38 @@ class SIRModel:
     def run_sir_simulation(
     N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, v, e, num_days
 ):
-    S = N - I0 - R0 - D0  # Account for deceased individuals
-    I = I0
-    R = R0
-    D = D0  # Start with an initial number of deceased individuals
-
-    susceptible = [S]
-    infected = [I]
-    recovered = [R]
-    deceased = [D]
-
-    # Effective transmission rate due to high-risk group interactions
-    beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
-
-    for _ in range(num_days):
-        # Vaccination effect
-        vaccinated = v * S  # Number of vaccinated individuals per day
-        directly_immune = vaccinated * e  # Vaccinated individuals gaining full immunity
-        partially_immune = vaccinated * (1 - e)  # Remaining partially immune population
-
-        S_new = S - beta_eff * S * I / N - vaccinated  # Remove vaccinated from susceptible
-        I_new = I + beta_eff * S * I / N - gamma * I - delta * I
-        R_new = R + gamma * I + directly_immune  # Add directly immune to recovered
-        D_new = D + delta * I
-
-        S, I, R, D = S_new, I_new, R_new, D_new
-
-        susceptible.append(S)
-        infected.append(I)
-        recovered.append(R)
-        deceased.append(D)
-
-    return susceptible, infected, recovered, deceased
+        S = N - I0 - R0 - D0  # Account for deceased individuals
+        I = I0
+        R = R0
+        D = D0  # Start with an initial number of deceased individuals
+    
+        susceptible = [S]
+        infected = [I]
+        recovered = [R]
+        deceased = [D]
+    
+        # Effective transmission rate due to high-risk group interactions
+        beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
+    
+        for _ in range(num_days):
+            # Vaccination effect
+            vaccinated = v * S  # Number of vaccinated individuals per day
+            directly_immune = vaccinated * e  # Vaccinated individuals gaining full immunity
+            partially_immune = vaccinated * (1 - e)  # Remaining partially immune population
+    
+            S_new = S - beta_eff * S * I / N - vaccinated  # Remove vaccinated from susceptible
+            I_new = I + beta_eff * S * I / N - gamma * I - delta * I
+            R_new = R + gamma * I + directly_immune  # Add directly immune to recovered
+            D_new = D + delta * I
+    
+            S, I, R, D = S_new, I_new, R_new, D_new
+    
+            susceptible.append(S)
+            infected.append(I)
+            recovered.append(R)
+            deceased.append(D)
+    
+        return susceptible, infected, recovered, deceased
 
 # Vaccination Centers Data
 def get_vaccination_centers_by_disease(disease):
@@ -1589,4 +1589,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
