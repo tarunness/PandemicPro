@@ -3,8 +3,8 @@ pandas
 streamlit
 plotly
 requests
-folium
-streamlit-folium
-scikit-learn
 gspread
 google-auth
+scikit-learn
+folium
+streamlit-folium
