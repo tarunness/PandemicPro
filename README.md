@@ -1,1 +1,1 @@
-# mpox
+# PandemicPro
