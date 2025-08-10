@@ -927,39 +927,39 @@ def variant_aware_prediction(historical_data, days_ahead, disease_params):
     return predictions
     
     @staticmethod
-def predict_future_trend(historical_data, days_ahead=30, disease_params=None, external_features=None):
-    """Enhanced AI prediction with multiple advanced models"""
-    if len(historical_data) < 14:
-        return [max(0, historical_data[-1]) for _ in range(days_ahead)]
-    
-    try:
-        # Model 1: Facebook Prophet with seasonality
-        prophet_pred = AIPredictor.prophet_prediction(historical_data, days_ahead, disease_params)
+    def predict_future_trend(historical_data, days_ahead=30, disease_params=None, external_features=None):
+        """Enhanced AI prediction with multiple advanced models"""
+        if len(historical_data) < 14:
+            return [max(0, historical_data[-1]) for _ in range(days_ahead)]
         
-        # Model 2: LSTM Neural Network
-        lstm_pred = AIPredictor.lstm_prediction(historical_data, days_ahead)
-        
-        # Model 3: XGBoost with external features
-        xgb_pred = AIPredictor.xgboost_prediction(historical_data, days_ahead, external_features)
-        
-        # Model 4: Disease-specific specialized model
-        specialized_pred = AIPredictor.disease_specific_model(historical_data, days_ahead, disease_params)
-        
-        # Model 5: Enhanced exponential smoothing (fallback)
-        exp_pred = AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
-        
-        # Intelligent ensemble with adaptive weights
-        final_prediction = AIPredictor.adaptive_ensemble(
-            [prophet_pred, lstm_pred, xgb_pred, specialized_pred, exp_pred],
-            historical_data, disease_params
-        )
-        
-        return final_prediction
-        
-    except Exception as e:
-        st.warning(f"Advanced prediction failed: {e}")
-        # Fallback to enhanced exponential smoothing
-        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+        try:
+            # Model 1: Facebook Prophet with seasonality
+            prophet_pred = AIPredictor.prophet_prediction(historical_data, days_ahead, disease_params)
+            
+            # Model 2: LSTM Neural Network
+            lstm_pred = AIPredictor.lstm_prediction(historical_data, days_ahead)
+            
+            # Model 3: XGBoost with external features
+            xgb_pred = AIPredictor.xgboost_prediction(historical_data, days_ahead, external_features)
+            
+            # Model 4: Disease-specific specialized model
+            specialized_pred = AIPredictor.disease_specific_model(historical_data, days_ahead, disease_params)
+            
+            # Model 5: Enhanced exponential smoothing (fallback)
+            exp_pred = AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+            
+            # Intelligent ensemble with adaptive weights
+            final_prediction = AIPredictor.adaptive_ensemble(
+                [prophet_pred, lstm_pred, xgb_pred, specialized_pred, exp_pred],
+                historical_data, disease_params
+            )
+            
+            return final_prediction
+            
+        except Exception as e:
+            st.warning(f"Advanced prediction failed: {e}")
+            # Fallback to enhanced exponential smoothing
+            return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
 
 @staticmethod
 def prophet_prediction(historical_data, days_ahead, disease_params):
@@ -2685,6 +2685,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
