@@ -437,6 +437,172 @@ if 'csv_manager' not in st.session_state:
 
 # Enhanced Data Fetcher with Multiple APIs
 class EnhancedDataFetcher:
+    """Fetch external factors that influence disease transmission"""
+    @staticmethod
+    def get_weather_data(country, days=30):
+        """Fetch temperature, humidity, precipitation data"""
+        try:
+            # OpenWeatherMap API (you'd need API key)
+            # For now, simulate realistic weather patterns
+            weather_data = []
+            for i in range(days):
+                date = datetime.now() + timedelta(days=i)
+                month = date.month
+                
+                # Seasonal temperature pattern
+                if month in [12, 1, 2]:  # Winter
+                    temp = np.random.normal(5, 8)  # Cold
+                    humidity = np.random.normal(70, 10)
+                elif month in [6, 7, 8]:  # Summer
+                    temp = np.random.normal(25, 5)  # Warm
+                    humidity = np.random.normal(60, 15)
+                else:  # Spring/Fall
+                    temp = np.random.normal(15, 10)
+                    humidity = np.random.normal(65, 12)
+                
+                weather_data.append({
+                    'temperature': temp,
+                    'humidity': max(30, min(90, humidity)),
+                    'precipitation': max(0, np.random.exponential(2))
+                })
+            
+            return weather_data
+        except Exception:
+            return [{'temperature': 20, 'humidity': 60, 'precipitation': 0}] * days
+    
+    @staticmethod
+    def get_mobility_data(country):
+        """Get mobility trends (Google/Apple mobility data simulation)"""
+        try:
+            # Simulate mobility patterns
+            baseline = 100  # Pre-pandemic baseline
+            
+            # Current mobility based on country (rough estimates)
+            mobility_factors = {
+                "Global": 0.85,
+                "India": 0.90,
+                "USA": 0.88,
+                "China": 0.75,
+                "Brazil": 0.92
+            }
+            
+            current_mobility = baseline * mobility_factors.get(country, 0.85)
+            
+            return {
+                'retail_recreation': current_mobility + np.random.normal(0, 5),
+                'grocery_pharmacy': current_mobility + np.random.normal(0, 3),
+                'parks': current_mobility + np.random.normal(0, 10),
+                'transit': current_mobility + np.random.normal(0, 8),
+                'workplaces': current_mobility + np.random.normal(0, 6),
+                'residential': 100 + (100 - current_mobility) * 0.3
+            }
+        except Exception:
+            return {
+                'retail_recreation': 85, 
+                'grocery_pharmacy': 90, 
+                'parks': 80, 
+                'transit': 70, 
+                'workplaces': 75, 
+                'residential': 115
+            }
+    
+    @staticmethod
+    def get_policy_stringency(country):
+        """Get policy stringency index (Oxford COVID-19 Government Response Tracker simulation)"""
+        try:
+            # Simulate current policy stringency (0-100 scale)
+            stringency_levels = {
+                "Global": 25,
+                "China": 45,
+                "India": 30,
+                "USA": 20,
+                "Brazil": 25,
+                "UK": 15,
+                "Germany": 20,
+                "France": 25,
+                "Italy": 30,
+                "Spain": 20,
+                "Russia": 35,
+                "Japan": 25,
+                "South Korea": 30
+            }
+            
+            base_stringency = stringency_levels.get(country, 25)
+            # Add some random variation
+            current_stringency = max(0, min(100, base_stringency + np.random.normal(0, 5)))
+            
+            return {
+                'stringency_index': current_stringency,
+                'school_closures': min(3, max(0, int(current_stringency / 25))),
+                'workplace_closures': min(3, max(0, int(current_stringency / 30))),
+                'public_events_restrictions': min(2, max(0, int(current_stringency / 35))),
+                'gathering_restrictions': min(4, max(0, int(current_stringency / 20))),
+                'transport_closures': min(2, max(0, int(current_stringency / 40))),
+                'stay_home_requirements': min(3, max(0, int(current_stringency / 35))),
+                'internal_movement_restrictions': min(2, max(0, int(current_stringency / 45))),
+                'international_travel_controls': min(4, max(0, int(current_stringency / 15)))
+            }
+        except Exception:
+            return {'stringency_index': 25, 'school_closures': 1, 'workplace_closures': 1}
+    
+    @staticmethod
+    def get_vaccination_data(country):
+        """Get vaccination coverage data"""
+        try:
+            # Simulate vaccination rates based on global trends
+            vaccination_rates = {
+                "Global": 65.2,
+                "India": 71.8,
+                "USA": 68.3,
+                "China": 89.7,
+                "Brazil": 85.1,
+                "UK": 75.2,
+                "Germany": 76.1,
+                "France": 80.4,
+                "Italy": 84.2,
+                "Spain": 87.9,
+                "Russia": 49.8,
+                "Japan": 82.6,
+                "South Korea": 87.1
+            }
+            
+            base_rate = vaccination_rates.get(country, 65.2)
+            
+            return {
+                'total_vaccinated_percent': base_rate,
+                'fully_vaccinated_percent': base_rate * 0.92,
+                'boosted_percent': base_rate * 0.65,
+                'daily_vaccinations_per_million': max(0, np.random.normal(1000, 500))
+            }
+        except Exception:
+            return {
+                'total_vaccinated_percent': 65,
+                'fully_vaccinated_percent': 60,
+                'boosted_percent': 40,
+                'daily_vaccinations_per_million': 800
+            }
+    
+    @staticmethod
+    def get_demographic_factors(country):
+        """Get demographic factors affecting disease spread"""
+        try:
+            # Population density and age structure factors
+            demographic_data = {
+                "Global": {'density': 57, 'median_age': 30.9, 'urban_percent': 56.2},
+                "India": {'density': 464, 'median_age': 28.4, 'urban_percent': 35.4},
+                "USA": {'density': 36, 'median_age': 38.5, 'urban_percent': 82.7},
+                "China": {'density': 153, 'median_age': 38.4, 'urban_percent': 63.9},
+                "Brazil": {'density': 25, 'median_age': 33.5, 'urban_percent': 87.6},
+                "UK": {'density': 275, 'median_age': 40.6, 'urban_percent': 84.2},
+                "Germany": {'density': 240, 'median_age': 47.8, 'urban_percent': 77.5},
+                "France": {'density': 119, 'median_age': 42.3, 'urban_percent': 81.5},
+                "Italy": {'density': 206, 'median_age': 47.9, 'urban_percent': 71.0},
+                "Japan": {'density': 347, 'median_age': 48.6, 'urban_percent': 91.8}
+            }
+            
+            return demographic_data.get(country, demographic_data["Global"])
+        except Exception:
+            return {'density': 57, 'median_age': 30.9, 'urban_percent': 56.2}
     @staticmethod
     def fetch_disease_data(country, disease):
         """Fetch real data based on disease and country"""
@@ -624,101 +790,439 @@ class EnhancedDataFetcher:
 # AI Prediction System
 class AIPredictor:
     @staticmethod
-    def generate_historical_data(current_data, days=180):
-        """Generate realistic historical data for AI prediction"""
-        total_cases = current_data['total_cases']
-        active_cases = current_data['active_cases']
+def generate_historical_data(current_data, days=180, disease_params=None):
+    """Generate enhanced realistic historical data with disease-specific patterns"""
+    total_cases = current_data['total_cases']
+    active_cases = current_data['active_cases']
+    
+    # Disease-specific parameters
+    if disease_params:
+        disease_type = disease_params.get('disease', 'COVID-19')
+        r0 = disease_params.get('basic_r0', 2.5)
+        seasonality = disease_params.get('seasonal_strength', 0.3)
+    else:
+        disease_type = 'COVID-19'
+        r0 = 2.5
+        seasonality = 0.3
+    
+    historical_data = []
+    
+    for i in range(days):
+        t = i / days
         
-        # Create epidemic curve with multiple waves
-        historical_data = []
+        # Base epidemic curves based on disease type
+        if disease_type == "Influenza":
+            # Strong seasonal pattern for flu
+            seasonal_factor = 1 + seasonality * np.sin(2 * np.pi * t + np.pi/2)  # Peak in winter
+            wave1 = active_cases * 0.4 * np.exp(-((t - 0.15) * 10)**2) * seasonal_factor
+            wave2 = active_cases * 0.9 * np.exp(-((t - 0.75) * 8)**2) * seasonal_factor
+            wave3 = active_cases * 0.3 * np.exp(-((t - 0.95) * 15)**2) * seasonal_factor
+            
+        elif disease_type == "Dengue":
+            # Monsoon-related pattern
+            monsoon_factor = 1 + 0.6 * np.sin(2 * np.pi * t + np.pi)  # Peak during monsoon
+            wave1 = active_cases * 0.5 * np.exp(-((t - 0.3) * 8)**2) * monsoon_factor
+            wave2 = active_cases * 0.8 * np.exp(-((t - 0.6) * 6)**2) * monsoon_factor
+            wave3 = active_cases * 0.4 * np.exp(-((t - 0.85) * 10)**2) * monsoon_factor
+            
+        elif disease_type == "Mpox":
+            # More concentrated outbreaks
+            wave1 = active_cases * 0.6 * np.exp(-((t - 0.4) * 12)**2)
+            wave2 = active_cases * 0.4 * np.exp(-((t - 0.7) * 15)**2)
+            wave3 = active_cases * 0.2 * np.exp(-((t - 0.9) * 20)**2)
+            
+        else:  # COVID-19 default
+            # Multi-wave pattern with variants
+            wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)   # Original strain
+            wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Delta variant
+            wave3 = active_cases * 0.6 * np.exp(-((t - 0.8) * 9)**2)   # Omicron variant
         
-        for i in range(days):
-            t = i / days
-            
-            # Multi-wave simulation based on real epidemic patterns
-            wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)  # Early wave
-            wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Main wave
-            wave3 = active_cases * 0.4 * np.exp(-((t - 0.8) * 10)**2)  # Recent wave
-            
-            baseline = active_cases * 0.1  # Baseline level
-            noise = np.random.normal(0, active_cases * 0.02)
-            
-            daily_value = max(0, wave1 + wave2 + wave3 + baseline + noise)
-            historical_data.append(daily_value)
+        combined_wave = wave1 + wave2 + wave3
         
-        return historical_data
+        # Add realistic noise and weekly patterns
+        weekly_pattern = 1 + 0.1 * np.sin(2 * np.pi * i / 7)  # Weekly cycles
+        noise = np.random.lognormal(0, 0.15)  # Log-normal noise for realistic variation
+        
+        daily_cases = max(1, int(combined_wave * weekly_pattern * noise))
+        historical_data.append(daily_cases)
+    
+    return historical_data
+
+@staticmethod
+def seasonal_prediction(historical_data, days_ahead, seasonal_strength=0.5):
+    """Seasonal prediction model for diseases like flu"""
+    if len(historical_data) < 30:
+        return [max(1, historical_data[-1])] * days_ahead
+    
+    # Calculate seasonal component
+    seasonal_period = 365  # Yearly seasonality
+    current_day = len(historical_data)
+    
+    predictions = []
+    base_trend = np.mean(historical_data[-30:])  # 30-day average as base
+    
+    for day in range(days_ahead):
+        future_day = current_day + day
+        seasonal_factor = 1 + seasonal_strength * np.sin(2 * np.pi * future_day / seasonal_period + np.pi/2)
+        
+        # Add slight trend decay
+        trend_factor = 0.99 ** day
+        
+        pred = base_trend * seasonal_factor * trend_factor
+        predictions.append(max(1, int(pred)))
+    
+    return predictions
+
+@staticmethod
+def climate_based_prediction(historical_data, days_ahead):
+    """Climate-based prediction for vector-borne diseases"""
+    if len(historical_data) < 14:
+        return [max(1, historical_data[-1])] * days_ahead
+    
+    # Simulate climate influence
+    base_cases = np.mean(historical_data[-14:])
+    
+    predictions = []
+    for day in range(days_ahead):
+        # Temperature and humidity influence
+        temp_factor = 1 + 0.3 * np.sin(2 * np.pi * day / 365)  # Seasonal temperature
+        humidity_factor = 1 + 0.2 * np.sin(2 * np.pi * day / 365 + np.pi/3)  # Monsoon pattern
+        
+        climate_multiplier = (temp_factor + humidity_factor) / 2
+        pred = base_cases * climate_multiplier * (0.98 ** day)  # Slight decay
+        
+        predictions.append(max(1, int(pred)))
+    
+    return predictions
+
+@staticmethod
+def variant_aware_prediction(historical_data, days_ahead, disease_params):
+    """Variant-aware prediction for COVID-19"""
+    if len(historical_data) < 21:
+        return [max(1, historical_data[-1])] * days_ahead
+    
+    # Analyze recent trends for variant emergence
+    recent_data = historical_data[-21:]  # Last 3 weeks
+    trend = np.polyfit(range(len(recent_data)), recent_data, 1)[0]  # Linear trend
+    
+    base_level = recent_data[-1]
+    predictions = []
+    
+    for day in range(days_ahead):
+        # Variant emergence probability (higher R0 = higher probability)
+        r0 = disease_params.get('basic_r0', 2.5)
+        variant_prob = min(0.1, (r0 - 2.0) / 10)  # Max 10% chance per month
+        
+        if np.random.random() < variant_prob / 30:  # Daily probability
+            # New variant wave
+            wave_intensity = np.random.uniform(1.2, 2.0)
+            pred = base_level * wave_intensity
+        else:
+            # Normal evolution with trend
+            pred = base_level + trend * day * (0.95 ** day)  # Dampened trend
+        
+        predictions.append(max(1, int(pred)))
+        base_level = pred  # Update base for next prediction
+    
+    return predictions
     
     @staticmethod
-    def predict_future_trend(historical_data, days_ahead=30, disease_params=None):
-        """Enhanced AI prediction with disease-specific parameters"""
-        if len(historical_data) < 14:
-            return [max(0, historical_data[-1]) for _ in range(days_ahead)]
+def predict_future_trend(historical_data, days_ahead=30, disease_params=None, external_features=None):
+    """Enhanced AI prediction with multiple advanced models"""
+    if len(historical_data) < 14:
+        return [max(0, historical_data[-1]) for _ in range(days_ahead)]
+    
+    try:
+        # Model 1: Facebook Prophet with seasonality
+        prophet_pred = AIPredictor.prophet_prediction(historical_data, days_ahead, disease_params)
         
-        try:
-            # Ensemble prediction combining multiple methods
-            predictions = []
+        # Model 2: LSTM Neural Network
+        lstm_pred = AIPredictor.lstm_prediction(historical_data, days_ahead)
+        
+        # Model 3: XGBoost with external features
+        xgb_pred = AIPredictor.xgboost_prediction(historical_data, days_ahead, external_features)
+        
+        # Model 4: Disease-specific specialized model
+        specialized_pred = AIPredictor.disease_specific_model(historical_data, days_ahead, disease_params)
+        
+        # Model 5: Enhanced exponential smoothing (fallback)
+        exp_pred = AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+        
+        # Intelligent ensemble with adaptive weights
+        final_prediction = AIPredictor.adaptive_ensemble(
+            [prophet_pred, lstm_pred, xgb_pred, specialized_pred, exp_pred],
+            historical_data, disease_params
+        )
+        
+        return final_prediction
+        
+    except Exception as e:
+        st.warning(f"Advanced prediction failed: {e}")
+        # Fallback to enhanced exponential smoothing
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+
+@staticmethod
+def prophet_prediction(historical_data, days_ahead, disease_params):
+    """Facebook Prophet prediction with disease-specific seasonality"""
+    try:
+        # Prepare data for Prophet
+        dates = pd.date_range(end=datetime.now(), periods=len(historical_data), freq='D')
+        df = pd.DataFrame({'ds': dates, 'y': historical_data})
+        
+        # Disease-specific seasonality
+        from prophet import Prophet
+        
+        if disease_params and disease_params.get('seasonal_strength', 0) > 0.5:
+            # Strong seasonality (flu, dengue)
+            model = Prophet(
+                yearly_seasonality=True,
+                weekly_seasonality=True,
+                daily_seasonality=False,
+                seasonality_mode='multiplicative'
+            )
+        else:
+            # Weak seasonality (COVID, Mpox)
+            model = Prophet(
+                yearly_seasonality=True,
+                weekly_seasonality=True,
+                daily_seasonality=False,
+                seasonality_mode='additive'
+            )
+        
+        model.fit(df)
+        
+        # Make future predictions
+        future = model.make_future_dataframe(periods=days_ahead)
+        forecast = model.predict(future)
+        
+        predictions = forecast['yhat'].tail(days_ahead).tolist()
+        return [max(1, int(pred)) for pred in predictions]
+        
+    except ImportError:
+        st.warning("Prophet not installed. Using exponential smoothing.")
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+    except Exception:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+
+@staticmethod
+def lstm_prediction(historical_data, days_ahead):
+    """LSTM Neural Network for complex temporal patterns"""
+    try:
+        import tensorflow as tf
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import LSTM, Dense
+        
+        # Prepare data for LSTM
+        data = np.array(historical_data).reshape(-1, 1)
+        
+        # Normalize data
+        from sklearn.preprocessing import MinMaxScaler
+        scaler = MinMaxScaler()
+        data_scaled = scaler.fit_transform(data)
+        
+        # Create sequences
+        sequence_length = min(14, len(historical_data) // 4)
+        X, y = [], []
+        
+        for i in range(sequence_length, len(data_scaled)):
+            X.append(data_scaled[i-sequence_length:i, 0])
+            y.append(data_scaled[i, 0])
+        
+        X, y = np.array(X), np.array(y)
+        X = np.reshape(X, (X.shape[0], X.shape[1], 1))
+        
+        # Build LSTM model
+        model = Sequential([
+            LSTM(50, return_sequences=True, input_shape=(sequence_length, 1)),
+            LSTM(50, return_sequences=False),
+            Dense(25),
+            Dense(1)
+        ])
+        
+        model.compile(optimizer='adam', loss='mean_squared_error')
+        
+        # Train model (quick training for real-time use)
+        model.fit(X, y, epochs=10, batch_size=1, verbose=0)
+        
+        # Make predictions
+        last_sequence = data_scaled[-sequence_length:].reshape(1, sequence_length, 1)
+        predictions = []
+        
+        for _ in range(days_ahead):
+            pred = model.predict(last_sequence, verbose=0)[0, 0]
+            predictions.append(pred)
             
-            # Method 1: Exponential smoothing with trend
-            alpha, beta = 0.3, 0.1
-            smoothed = [historical_data[0]]
-            trend = [0]
+            # Update sequence for next prediction
+            last_sequence = np.roll(last_sequence, -1, axis=1)
+            last_sequence[0, -1, 0] = pred
+        
+        # Inverse transform predictions
+        predictions_scaled = np.array(predictions).reshape(-1, 1)
+        predictions_original = scaler.inverse_transform(predictions_scaled)
+        
+        return [max(1, int(pred[0])) for pred in predictions_original]
+        
+    except ImportError:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+    except Exception:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+
+@staticmethod
+def xgboost_prediction(historical_data, days_ahead, external_features):
+    """XGBoost with external factors"""
+    try:
+        import xgboost as xgb
+        
+        # Create features
+        features = []
+        targets = []
+        
+        for i in range(7, len(historical_data)):
+            # Last 7 days as features
+            feature_vector = historical_data[i-7:i]
             
-            for i in range(1, len(historical_data)):
-                s_prev, t_prev = smoothed[-1], trend[-1]
-                s_new = alpha * historical_data[i] + (1 - alpha) * (s_prev + t_prev)
-                t_new = beta * (s_new - s_prev) + (1 - beta) * t_prev
-                smoothed.append(s_new)
-                trend.append(t_new)
+            # Add time-based features
+            feature_vector.extend([
+                i % 7,  # Day of week
+                i % 30,  # Day of month
+                len(historical_data) - i  # Days from end
+            ])
             
-            exp_predictions = []
-            for i in range(days_ahead):
-                pred = smoothed[-1] + trend[-1] * (i + 1)
-                exp_predictions.append(max(0, pred))
+            features.append(feature_vector)
+            targets.append(historical_data[i])
+        
+        if len(features) < 10:  # Not enough data for XGBoost
+            return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+        
+        # Train XGBoost model
+        X = np.array(features)
+        y = np.array(targets)
+        
+        model = xgb.XGBRegressor(n_estimators=100, max_depth=3, random_state=42)
+        model.fit(X, y)
+        
+        # Make predictions
+        predictions = []
+        current_sequence = historical_data[-7:]
+        
+        for day in range(days_ahead):
+            # Prepare feature vector
+            feature_vector = current_sequence.copy()
+            feature_vector.extend([
+                (len(historical_data) + day) % 7,  # Day of week
+                (len(historical_data) + day) % 30,  # Day of month
+                day  # Days ahead
+            ])
             
-            # Method 2: Polynomial regression
-            X = np.array(range(len(historical_data))).reshape(-1, 1)
-            poly_features = PolynomialFeatures(degree=min(3, len(historical_data)//10))
-            X_poly = poly_features.fit_transform(X)
+            # Predict next value
+            pred = model.predict(np.array([feature_vector]))[0]
+            predictions.append(max(1, int(pred)))
             
-            model = LinearRegression()
-            model.fit(X_poly, historical_data)
+            # Update sequence for next prediction
+            current_sequence = current_sequence[1:] + [pred]
+        
+        return predictions
+        
+    except ImportError:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+    except Exception:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+
+@staticmethod
+def disease_specific_model(historical_data, days_ahead, disease_params):
+    """Disease-specific prediction models"""
+    if not disease_params:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
+    
+    disease_type = disease_params.get('disease', 'COVID-19')
+    
+    if disease_type == "Influenza":
+        # Strong seasonal model for flu
+        return AIPredictor.seasonal_prediction(historical_data, days_ahead, seasonal_strength=0.8)
+    elif disease_type == "Dengue":
+        # Climate-dependent model
+        return AIPredictor.climate_based_prediction(historical_data, days_ahead)
+    elif disease_type == "COVID-19":
+        # Variant-aware model
+        return AIPredictor.variant_aware_prediction(historical_data, days_ahead, disease_params)
+    else:
+        return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+
+@staticmethod
+def enhanced_exponential_smoothing(historical_data, days_ahead, disease_params):
+    """Enhanced exponential smoothing with disease parameters"""
+    if len(historical_data) < 3:
+        return [max(1, historical_data[-1]) for _ in range(days_ahead)]
+    
+    # Adaptive parameters based on disease
+    if disease_params:
+        # More responsive for fast-changing diseases
+        alpha = 0.4 if disease_params.get('basic_r0', 1) > 2.0 else 0.2
+        beta = 0.2 if disease_params.get('basic_r0', 1) > 2.0 else 0.1
+    else:
+        alpha, beta = 0.3, 0.1
+    
+    # Double exponential smoothing
+    smoothed = [historical_data[0]]
+    trend = [0]
+    
+    for i in range(1, len(historical_data)):
+        s = alpha * historical_data[i] + (1 - alpha) * (smoothed[i-1] + trend[i-1])
+        t = beta * (s - smoothed[i-1]) + (1 - beta) * trend[i-1]
+        smoothed.append(s)
+        trend.append(t)
+    
+    # Generate predictions with trend damping
+    predictions = []
+    for i in range(days_ahead):
+        # Dampen trend over time
+        damping = 0.98 ** i  # Trend reduces by 2% each day
+        pred = smoothed[-1] + trend[-1] * (i + 1) * damping
+        predictions.append(max(1, int(pred)))
+    
+    return predictions
+
+@staticmethod
+def adaptive_ensemble(predictions_list, historical_data, disease_params):
+    """Intelligent ensemble with adaptive weights"""
+    if not predictions_list:
+        return [1] * 30
+    
+    # Filter out failed predictions (None or empty)
+    valid_predictions = [p for p in predictions_list if p and len(p) > 0]
+    
+    if not valid_predictions:
+        return [max(1, historical_data[-1])] * len(predictions_list[0]) if predictions_list[0] else [1] * 30
+    
+    days_ahead = len(valid_predictions[0])
+    
+    # Calculate weights based on recent performance
+    weights = []
+    for pred in valid_predictions:
+        if len(historical_data) >= 7:
+            # Test how well this model type would have predicted last week
+            test_pred = pred[-7:] if len(pred) >= 7 else pred
+            test_actual = historical_data[-7:] if len(historical_data) >= 7 else historical_data
             
-            future_X = np.array(range(len(historical_data), len(historical_data) + days_ahead)).reshape(-1, 1)
-            future_X_poly = poly_features.transform(future_X)
-            poly_predictions = model.predict(future_X_poly)
-            poly_predictions = [max(0, p) for p in poly_predictions]
-            
-            # Method 3: Seasonal decomposition (simplified)
-            seasonal_factor = np.sin(2 * np.pi * np.array(range(days_ahead)) / 7) * 0.1 + 1
-            seasonal_predictions = [historical_data[-1] * factor for factor in seasonal_factor]
-            
-            # Ensemble with weights
-            ensemble_predictions = []
-            weights = [0.4, 0.4, 0.2]  # Exponential, Polynomial, Seasonal
-            
-            for i in range(days_ahead):
-                weighted_pred = (
-                    exp_predictions[i] * weights[0] +
-                    poly_predictions[i] * weights[1] +
-                    seasonal_predictions[i] * weights[2]
-                )
-                
-                # Apply disease-specific constraints
-                if disease_params:
-                    # Prevent unrealistic growth
-                    max_growth = historical_data[-1] * 1.1  # Max 10% daily growth
-                    weighted_pred = min(weighted_pred, max_growth)
-                
-                ensemble_predictions.append(max(0, weighted_pred))
-            
-            return ensemble_predictions
-            
-        except Exception as e:
-            st.warning(f"AI prediction error: {str(e)}")
-            # Simple fallback
-            recent_avg = np.mean(historical_data[-7:])
-            recent_trend = np.mean(np.diff(historical_data[-14:]))
-            return [max(0, recent_avg + recent_trend * i) for i in range(1, days_ahead + 1)]
+            # Calculate error (lower is better)
+            error = np.mean([(abs(p - a) / max(a, 1)) for p, a in zip(test_pred[:len(test_actual)], test_actual)])
+            weight = 1 / (1 + error)  # Higher weight for lower error
+        else:
+            weight = 1.0  # Equal weights if no history to test
+        
+        weights.append(weight)
+    
+    # Normalize weights
+    total_weight = sum(weights)
+    weights = [w / total_weight for w in weights]
+    
+    # Combine predictions with weights
+    ensemble_pred = []
+    for day in range(days_ahead):
+        weighted_sum = sum([pred[day] * weight for pred, weight in zip(valid_predictions, weights)])
+        ensemble_pred.append(max(1, int(weighted_sum)))
+    
+    return ensemble_pred
 
 # SIR Model Implementation
 # Enhanced SIR Model with High-Risk Groups
@@ -2181,5 +2685,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
