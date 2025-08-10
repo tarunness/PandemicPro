@@ -186,8 +186,7 @@ DISEASE_CONFIG = {
         "infectious_period": 10,
         "basic_r0": 2.5,
         "vaccine_effectiveness": 0.95,
-        "vaccines": ["COVISHIELD", "COVAXIN", "Pfizer-BioNTech", "Moderna", "Johnson & Johnson"],
-        "seasonal_strength": 0.3
+        "vaccines": ["COVISHIELD", "COVAXIN", "Pfizer-BioNTech", "Moderna", "Johnson & Johnson"]
     },
     "Mpox": {
         "transmission_rate": 0.15,
@@ -197,8 +196,7 @@ DISEASE_CONFIG = {
         "infectious_period": 21,
         "basic_r0": 1.8,
         "vaccine_effectiveness": 0.85,
-        "vaccines": ["JYNNEOS", "ACAM2000"],
-        "seasonal_strength": 0.1
+        "vaccines": ["JYNNEOS", "ACAM2000"]
     },
     "Influenza": {
         "transmission_rate": 0.5,
@@ -208,8 +206,7 @@ DISEASE_CONFIG = {
         "infectious_period": 7,
         "basic_r0": 1.3,
         "vaccine_effectiveness": 0.60,
-        "vaccines": ["Seasonal Flu Vaccine", "H1N1 Vaccine"],
-        "seasonal_strength": 0.8
+        "vaccines": ["Seasonal Flu Vaccine", "H1N1 Vaccine"]
     },
     "H5N1 Bird Flu": {
         "transmission_rate": 0.1,
@@ -219,8 +216,7 @@ DISEASE_CONFIG = {
         "infectious_period": 14,
         "basic_r0": 0.8,
         "vaccine_effectiveness": 0.70,
-        "vaccines": ["H5N1 Vaccine (Research)"],
-        "seasonal_strength": 0.2
+        "vaccines": ["H5N1 Vaccine (Research)"]
     },
     "Dengue": {
         "transmission_rate": 0.3,
@@ -230,52 +226,8 @@ DISEASE_CONFIG = {
         "infectious_period": 7,
         "basic_r0": 2.0,
         "vaccine_effectiveness": 0.65,
-        "vaccines": ["Dengvaxia"],
-        "seasonal_strength": 0.6
+        "vaccines": ["Dengvaxia"]
     }
-}
-
-# High-risk group configurations
-HIGH_RISK_GROUPS = {
-    "COVID-19": {
-        "Elderly (65+)": {"proportion": 0.15, "risk_multiplier": 3.5, "mortality_multiplier": 8.0},
-        "Immunocompromised": {"proportion": 0.03, "risk_multiplier": 2.8, "mortality_multiplier": 5.0},
-        "Diabetes": {"proportion": 0.08, "risk_multiplier": 1.8, "mortality_multiplier": 2.5},
-        "Heart Disease": {"proportion": 0.06, "risk_multiplier": 2.2, "mortality_multiplier": 3.0},
-        "Respiratory Disease": {"proportion": 0.04, "risk_multiplier": 2.5, "mortality_multiplier": 3.5}
-    },
-    "Mpox": {
-        "Immunocompromised": {"proportion": 0.03, "risk_multiplier": 4.0, "mortality_multiplier": 6.0},
-        "MSM Community": {"proportion": 0.02, "risk_multiplier": 3.0, "mortality_multiplier": 1.5},
-        "Healthcare Workers": {"proportion": 0.02, "risk_multiplier": 2.5, "mortality_multiplier": 1.2}
-    },
-    "Influenza": {
-        "Elderly (65+)": {"proportion": 0.15, "risk_multiplier": 2.5, "mortality_multiplier": 6.0},
-        "Pregnant Women": {"proportion": 0.02, "risk_multiplier": 2.0, "mortality_multiplier": 2.0},
-        "Children (<5)": {"proportion": 0.08, "risk_multiplier": 1.8, "mortality_multiplier": 1.5},
-        "Chronic Conditions": {"proportion": 0.12, "risk_multiplier": 2.2, "mortality_multiplier": 3.0}
-    },
-    "H5N1 Bird Flu": {
-        "Elderly (65+)": {"proportion": 0.15, "risk_multiplier": 2.0, "mortality_multiplier": 1.5},
-        "Immunocompromised": {"proportion": 0.03, "risk_multiplier": 3.0, "mortality_multiplier": 2.0},
-        "Poultry Workers": {"proportion": 0.001, "risk_multiplier": 5.0, "mortality_multiplier": 1.2}
-    },
-    "Dengue": {
-        "Children/Teens": {"proportion": 0.25, "risk_multiplier": 2.0, "mortality_multiplier": 3.0},
-        "Previous Dengue": {"proportion": 0.05, "risk_multiplier": 3.5, "mortality_multiplier": 4.0},
-        "Pregnant Women": {"proportion": 0.02, "risk_multiplier": 1.8, "mortality_multiplier": 2.5}
-    }
-}
-
-# Intervention configurations
-INTERVENTION_CONFIG = {
-    "None": {"transmission_reduction": 0.0, "implementation_cost": 0},
-    "Basic Hygiene": {"transmission_reduction": 0.15, "implementation_cost": 1},
-    "Mask Mandate": {"transmission_reduction": 0.25, "implementation_cost": 2},
-    "Social Distancing": {"transmission_reduction": 0.40, "implementation_cost": 4},
-    "Partial Lockdown": {"transmission_reduction": 0.60, "implementation_cost": 7},
-    "Full Lockdown": {"transmission_reduction": 0.80, "implementation_cost": 10},
-    "Vaccination Campaign": {"transmission_reduction": 0.70, "implementation_cost": 6}
 }
 
 # Country configurations
@@ -296,92 +248,12 @@ COUNTRY_CONFIG = {
     "Canada": {"population": 39000000, "api_code": "canada"}
 }
 
-# Enhanced error handling and validation
-def validate_model_parameters(beta, gamma, delta, I0, R0, N):
-    """Validate SIR model parameters for biological plausibility"""
-    errors = []
-    
-    if beta <= 0:
-        errors.append("Transmission rate must be positive")
-    if gamma <= 0:
-        errors.append("Recovery rate must be positive")
-    if delta < 0:
-        errors.append("Death rate cannot be negative")
-    if I0 + R0 >= N:
-        errors.append("Initial infected + recovered cannot exceed population")
-    if beta > 5:
-        errors.append("Transmission rate seems unrealistically high")
-    if gamma > 1:
-        errors.append("Recovery rate cannot exceed 1 (100% daily recovery)")
-    
-    return errors
-
-def safe_calculation(func, *args, default=0):
-    """Safely perform calculations with error handling"""
-    try:
-        result = func(*args)
-        return result if not (np.isnan(result) or np.isinf(result)) else default
-    except (ZeroDivisionError, ValueError, TypeError):
-        return default
-
 # CSV Data Storage System
 class CSVDataManager:
     def __init__(self):
         self.vaccination_bookings = []
         self.symptom_reports = []
         self.model_results = []
-
-    def add_symptom_report(self, symptom_data):
-        """Add enhanced symptom report to CSV storage"""
-        symptom_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'disease': symptom_data.get('disease', ''),
-            'country': symptom_data.get('country', ''),
-            'patient_age': symptom_data.get('age', 0),
-            'primary_symptoms_score': symptom_data.get('primary_score', 0),
-            'secondary_symptoms_score': symptom_data.get('secondary_score', 0),
-            'risk_factors_score': symptom_data.get('risk_score', 0),
-            'total_symptom_score': symptom_data.get('total_score', 0),
-            'identified_risk_groups': symptom_data.get('high_risk_groups', ''),
-            'infection_risk_multiplier': symptom_data.get('risk_multiplier', 1.0),
-            'mortality_risk_multiplier': symptom_data.get('mortality_multiplier', 1.0),
-            'enhanced_risk_score': symptom_data.get('enhanced_risk_score', 0),
-            'final_risk_level': symptom_data.get('risk_level', 'Unknown'),
-            'assessment_recommendations': symptom_data.get('recommendations', ''),
-            'requires_immediate_attention': symptom_data.get('enhanced_risk_score', 0) >= 15
-        }
-        self.symptom_reports.append(symptom_entry)
-
-    def add_model_result(self, model_data):
-        """Add enhanced model results to CSV storage"""
-        model_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'disease': model_data.get('disease', ''),
-            'country': model_data.get('country', ''),
-            'basic_r0': model_data.get('basic_r0', 0),
-            'effective_r0': model_data.get('effective_r0', 0),
-            'interventions_applied': model_data.get('interventions', ''),
-            'peak_infections': model_data.get('peak_infections', 0),
-            'peak_day': model_data.get('peak_day', 0),
-            'final_attack_rate_percent': model_data.get('final_attack_rate', 0),
-            'case_fatality_rate_percent': model_data.get('final_cfr', 0),
-            'total_predicted_deaths': model_data.get('total_deaths', 0),
-            'hospital_overflow_days': model_data.get('hospital_overflow_days', 0),
-            'vaccination_rate_percent': model_data.get('vaccination_rate', 0),
-            'simulation_days': model_data.get('simulation_days', 0),
-            'high_risk_groups_count': model_data.get('high_risk_groups', 0),
-            'transmission_reduction_percent': model_data.get('transmission_reduction', 0),
-            'intervention_cost_index': model_data.get('intervention_cost', 0)
-        }
-        self.model_results.append(model_entry)
-    
-    def get_model_results_csv(self):
-        """Generate CSV for model results"""
-        if not self.model_results:
-            return "No model results available"
-        
-        df = pd.DataFrame(self.model_results)
-        return df.to_csv(index=False)
     
     def add_vaccination_booking(self, booking_data):
         """Add vaccination booking to CSV storage"""
@@ -423,6 +295,20 @@ class CSVDataManager:
         
         df = pd.DataFrame(self.vaccination_bookings)
         return df.to_csv(index=False)
+    
+    def add_symptom_report(self, symptom_data):
+        """Add symptom report to CSV storage"""
+        self.symptom_reports.append({
+            'timestamp': datetime.now().isoformat(),
+            **symptom_data
+        })
+    
+    def add_model_result(self, model_data):
+        """Add model results to CSV storage"""
+        self.model_results.append({
+            'timestamp': datetime.now().isoformat(),
+            **model_data
+        })
 
 # Initialize CSV manager
 if 'csv_manager' not in st.session_state:
@@ -430,174 +316,6 @@ if 'csv_manager' not in st.session_state:
 
 # Enhanced Data Fetcher with Multiple APIs
 class EnhancedDataFetcher:
-    """Fetch external factors that influence disease transmission"""
-    
-    @staticmethod
-    def get_weather_data(country, days=30):
-        """Fetch temperature, humidity, precipitation data"""
-        try:
-            # OpenWeatherMap API (you'd need API key)
-            # For now, simulate realistic weather patterns
-            weather_data = []
-            for i in range(days):
-                date = datetime.now() + timedelta(days=i)
-                month = date.month
-                
-                # Seasonal temperature pattern
-                if month in [12, 1, 2]:  # Winter
-                    temp = np.random.normal(5, 8)  # Cold
-                    humidity = np.random.normal(70, 10)
-                elif month in [6, 7, 8]:  # Summer
-                    temp = np.random.normal(25, 5)  # Warm
-                    humidity = np.random.normal(60, 15)
-                else:  # Spring/Fall
-                    temp = np.random.normal(15, 10)
-                    humidity = np.random.normal(65, 12)
-                
-                weather_data.append({
-                    'temperature': temp,
-                    'humidity': max(30, min(90, humidity)),
-                    'precipitation': max(0, np.random.exponential(2))
-                })
-            
-            return weather_data
-        except Exception:
-            return [{'temperature': 20, 'humidity': 60, 'precipitation': 0}] * days
-    
-    @staticmethod
-    def get_mobility_data(country):
-        """Get mobility trends (Google/Apple mobility data simulation)"""
-        try:
-            # Simulate mobility patterns
-            baseline = 100  # Pre-pandemic baseline
-            
-            # Current mobility based on country (rough estimates)
-            mobility_factors = {
-                "Global": 0.85,
-                "India": 0.90,
-                "USA": 0.88,
-                "China": 0.75,
-                "Brazil": 0.92
-            }
-            
-            current_mobility = baseline * mobility_factors.get(country, 0.85)
-            
-            return {
-                'retail_recreation': current_mobility + np.random.normal(0, 5),
-                'grocery_pharmacy': current_mobility + np.random.normal(0, 3),
-                'parks': current_mobility + np.random.normal(0, 10),
-                'transit': current_mobility + np.random.normal(0, 8),
-                'workplaces': current_mobility + np.random.normal(0, 6),
-                'residential': 100 + (100 - current_mobility) * 0.3
-            }
-        except Exception:
-            return {
-                'retail_recreation': 85, 
-                'grocery_pharmacy': 90, 
-                'parks': 80, 
-                'transit': 70, 
-                'workplaces': 75, 
-                'residential': 115
-            }
-    
-    @staticmethod
-    def get_policy_stringency(country):
-        """Get policy stringency index (Oxford COVID-19 Government Response Tracker simulation)"""
-        try:
-            # Simulate current policy stringency (0-100 scale)
-            stringency_levels = {
-                "Global": 25,
-                "China": 45,
-                "India": 30,
-                "USA": 20,
-                "Brazil": 25,
-                "UK": 15,
-                "Germany": 20,
-                "France": 25,
-                "Italy": 30,
-                "Spain": 20,
-                "Russia": 35,
-                "Japan": 25,
-                "South Korea": 30
-            }
-            
-            base_stringency = stringency_levels.get(country, 25)
-            # Add some random variation
-            current_stringency = max(0, min(100, base_stringency + np.random.normal(0, 5)))
-            
-            return {
-                'stringency_index': current_stringency,
-                'school_closures': min(3, max(0, int(current_stringency / 25))),
-                'workplace_closures': min(3, max(0, int(current_stringency / 30))),
-                'public_events_restrictions': min(2, max(0, int(current_stringency / 35))),
-                'gathering_restrictions': min(4, max(0, int(current_stringency / 20))),
-                'transport_closures': min(2, max(0, int(current_stringency / 40))),
-                'stay_home_requirements': min(3, max(0, int(current_stringency / 35))),
-                'internal_movement_restrictions': min(2, max(0, int(current_stringency / 45))),
-                'international_travel_controls': min(4, max(0, int(current_stringency / 15)))
-            }
-        except Exception:
-            return {'stringency_index': 25, 'school_closures': 1, 'workplace_closures': 1}
-    
-    @staticmethod
-    def get_vaccination_data(country):
-        """Get vaccination coverage data"""
-        try:
-            # Simulate vaccination rates based on global trends
-            vaccination_rates = {
-                "Global": 65.2,
-                "India": 71.8,
-                "USA": 68.3,
-                "China": 89.7,
-                "Brazil": 85.1,
-                "UK": 75.2,
-                "Germany": 76.1,
-                "France": 80.4,
-                "Italy": 84.2,
-                "Spain": 87.9,
-                "Russia": 49.8,
-                "Japan": 82.6,
-                "South Korea": 87.1
-            }
-            
-            base_rate = vaccination_rates.get(country, 65.2)
-            
-            return {
-                'total_vaccinated_percent': base_rate,
-                'fully_vaccinated_percent': base_rate * 0.92,
-                'boosted_percent': base_rate * 0.65,
-                'daily_vaccinations_per_million': max(0, np.random.normal(1000, 500))
-            }
-        except Exception:
-            return {
-                'total_vaccinated_percent': 65,
-                'fully_vaccinated_percent': 60,
-                'boosted_percent': 40,
-                'daily_vaccinations_per_million': 800
-            }
-    
-    @staticmethod
-    def get_demographic_factors(country):
-        """Get demographic factors affecting disease spread"""
-        try:
-            # Population density and age structure factors
-            demographic_data = {
-                "Global": {'density': 57, 'median_age': 30.9, 'urban_percent': 56.2},
-                "India": {'density': 464, 'median_age': 28.4, 'urban_percent': 35.4},
-                "USA": {'density': 36, 'median_age': 38.5, 'urban_percent': 82.7},
-                "China": {'density': 153, 'median_age': 38.4, 'urban_percent': 63.9},
-                "Brazil": {'density': 25, 'median_age': 33.5, 'urban_percent': 87.6},
-                "UK": {'density': 275, 'median_age': 40.6, 'urban_percent': 84.2},
-                "Germany": {'density': 240, 'median_age': 47.8, 'urban_percent': 77.5},
-                "France": {'density': 119, 'median_age': 42.3, 'urban_percent': 81.5},
-                "Italy": {'density': 206, 'median_age': 47.9, 'urban_percent': 71.0},
-                "Japan": {'density': 347, 'median_age': 48.6, 'urban_percent': 91.8}
-            }
-            
-            return demographic_data.get(country, demographic_data["Global"])
-        except Exception:
-            return {'density': 57, 'median_age': 30.9, 'urban_percent': 56.2}
-    
     @staticmethod
     def fetch_disease_data(country, disease):
         """Fetch real data based on disease and country"""
@@ -613,30 +331,6 @@ class EnhancedDataFetcher:
         except Exception as e:
             st.error(f"Data fetch error: {str(e)}")
             return EnhancedDataFetcher.get_simulated_data(country, disease)
-
-    @staticmethod
-    def get_risk_group_data(disease, country):
-        """Get risk group specific data for enhanced modeling"""
-        base_data = EnhancedDataFetcher.fetch_disease_data(country, disease)
-        risk_groups = HIGH_RISK_GROUPS.get(disease, {})
-        
-        risk_group_data = {}
-        for group_name, group_config in risk_groups.items():
-            group_pop = int(base_data['population'] * group_config['proportion'])
-            
-            # Estimate group-specific cases based on risk multiplier
-            estimated_cases = int(base_data['active_cases'] * group_config['risk_multiplier'] * group_config['proportion'])
-            estimated_deaths = int(estimated_cases * group_config['mortality_multiplier'] * base_data.get('deaths', 0) / max(1, base_data['total_cases']))
-            
-            risk_group_data[group_name] = {
-                'population': group_pop,
-                'estimated_cases': min(estimated_cases, group_pop),
-                'estimated_deaths': min(estimated_deaths, estimated_cases),
-                'risk_multiplier': group_config['risk_multiplier'],
-                'mortality_multiplier': group_config['mortality_multiplier']
-            }
-        
-        return risk_group_data
     
     @staticmethod
     def fetch_covid_data(country):
@@ -785,390 +479,140 @@ class EnhancedDataFetcher:
 # AI Prediction System
 class AIPredictor:
     @staticmethod
-    def generate_historical_data(current_data, days=180, disease_params=None):
-        """Generate enhanced realistic historical data with disease-specific patterns"""
+    def generate_historical_data(current_data, days=180):
+        """Generate realistic historical data for AI prediction"""
         total_cases = current_data['total_cases']
         active_cases = current_data['active_cases']
         
-        # Disease-specific parameters
-        if disease_params:
-            disease_type = disease_params.get('disease', 'COVID-19')
-            r0 = disease_params.get('basic_r0', 2.5)
-            seasonality = disease_params.get('seasonal_strength', 0.3)
-        else:
-            disease_type = 'COVID-19'
-            r0 = 2.5
-            seasonality = 0.3
-        
+        # Create epidemic curve with multiple waves
         historical_data = []
         
         for i in range(days):
             t = i / days
             
-            # Base epidemic curves based on disease type
-            if disease_type == "Influenza":
-                # Strong seasonal pattern for flu
-                seasonal_factor = 1 + seasonality * np.sin(2 * np.pi * t + np.pi/2)  # Peak in winter
-                wave1 = active_cases * 0.4 * np.exp(-((t - 0.15) * 10)**2) * seasonal_factor
-                wave2 = active_cases * 0.9 * np.exp(-((t - 0.75) * 8)**2) * seasonal_factor
-                wave3 = active_cases * 0.3 * np.exp(-((t - 0.95) * 15)**2) * seasonal_factor
-                
-            elif disease_type == "Dengue":
-                # Monsoon-related pattern
-                monsoon_factor = 1 + 0.6 * np.sin(2 * np.pi * t + np.pi)  # Peak during monsoon
-                wave1 = active_cases * 0.5 * np.exp(-((t - 0.3) * 8)**2) * monsoon_factor
-                wave2 = active_cases * 0.8 * np.exp(-((t - 0.6) * 6)**2) * monsoon_factor
-                wave3 = active_cases * 0.4 * np.exp(-((t - 0.85) * 10)**2) * monsoon_factor
-                
-            elif disease_type == "Mpox":
-                # More concentrated outbreaks
-                wave1 = active_cases * 0.6 * np.exp(-((t - 0.4) * 12)**2)
-                wave2 = active_cases * 0.4 * np.exp(-((t - 0.7) * 15)**2)
-                wave3 = active_cases * 0.2 * np.exp(-((t - 0.9) * 20)**2)
-                
-            else:  # COVID-19 default
-                # Multi-wave pattern with variants
-                wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)   # Original strain
-                wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Delta variant
-                wave3 = active_cases * 0.6 * np.exp(-((t - 0.8) * 9)**2)   # Omicron variant
+            # Multi-wave simulation based on real epidemic patterns
+            wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)  # Early wave
+            wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Main wave
+            wave3 = active_cases * 0.4 * np.exp(-((t - 0.8) * 10)**2)  # Recent wave
             
-            combined_wave = wave1 + wave2 + wave3
+            baseline = active_cases * 0.1  # Baseline level
+            noise = np.random.normal(0, active_cases * 0.02)
             
-            # Add realistic noise and weekly patterns
-            weekly_pattern = 1 + 0.1 * np.sin(2 * np.pi * i / 7)  # Weekly cycles
-            noise = np.random.lognormal(0, 0.15)  # Log-normal noise for realistic variation
-            
-            daily_cases = max(1, int(combined_wave * weekly_pattern * noise))
-            historical_data.append(daily_cases)
+            daily_value = max(0, wave1 + wave2 + wave3 + baseline + noise)
+            historical_data.append(daily_value)
         
         return historical_data
-
+    
     @staticmethod
-    def seasonal_prediction(historical_data, days_ahead, seasonal_strength=0.5):
-        """Seasonal prediction model for diseases like flu"""
-        if len(historical_data) < 30:
-            return [max(1, historical_data[-1])] * days_ahead
-        
-        # Calculate seasonal component
-        seasonal_period = 365  # Yearly seasonality
-        current_day = len(historical_data)
-        
-        predictions = []
-        base_trend = np.mean(historical_data[-30:])  # 30-day average as base
-        
-        for day in range(days_ahead):
-            future_day = current_day + day
-            seasonal_factor = 1 + seasonal_strength * np.sin(2 * np.pi * future_day / seasonal_period + np.pi/2)
-            
-            # Add slight trend decay
-            trend_factor = 0.99 ** day
-            
-            pred = base_trend * seasonal_factor * trend_factor
-            predictions.append(max(1, int(pred)))
-        
-        return predictions
-
-    @staticmethod
-    def climate_based_prediction(historical_data, days_ahead):
-        """Climate-based prediction for vector-borne diseases"""
-        if len(historical_data) < 14:
-            return [max(1, historical_data[-1])] * days_ahead
-        
-        # Simulate climate influence
-        base_cases = np.mean(historical_data[-14:])
-        
-        predictions = []
-        for day in range(days_ahead):
-            # Temperature and humidity influence
-            temp_factor = 1 + 0.3 * np.sin(2 * np.pi * day / 365)  # Seasonal temperature
-            humidity_factor = 1 + 0.2 * np.sin(2 * np.pi * day / 365 + np.pi/3)  # Monsoon pattern
-            
-            climate_multiplier = (temp_factor + humidity_factor) / 2
-            pred = base_cases * climate_multiplier * (0.98 ** day)  # Slight decay
-            
-            predictions.append(max(1, int(pred)))
-        
-        return predictions
-
-    @staticmethod
-    def variant_aware_prediction(historical_data, days_ahead, disease_params):
-        """Variant-aware prediction for COVID-19"""
-        if len(historical_data) < 21:
-            return [max(1, historical_data[-1])] * days_ahead
-        
-        # Analyze recent trends for variant emergence
-        recent_data = historical_data[-21:]  # Last 3 weeks
-        trend = np.polyfit(range(len(recent_data)), recent_data, 1)[0]  # Linear trend
-        
-        base_level = recent_data[-1]
-        predictions = []
-        
-        for day in range(days_ahead):
-            # Variant emergence probability (higher R0 = higher probability)
-            r0 = disease_params.get('basic_r0', 2.5)
-            variant_prob = min(0.1, (r0 - 2.0) / 10)  # Max 10% chance per month
-            
-            if np.random.random() < variant_prob / 30:  # Daily probability
-                # New variant wave
-                wave_intensity = np.random.uniform(1.2, 2.0)
-                pred = base_level * wave_intensity
-            else:
-                # Normal evolution with trend
-                pred = base_level + trend * day * (0.95 ** day)  # Dampened trend
-            
-            predictions.append(max(1, int(pred)))
-            base_level = pred  # Update base for next prediction
-        
-        return predictions
-        
-    @staticmethod
-    def predict_future_trend(historical_data, days_ahead=30, disease_params=None, external_features=None):
-        """Enhanced AI prediction with multiple advanced models"""
+    def predict_future_trend(historical_data, days_ahead=30, disease_params=None):
+        """Enhanced AI prediction with disease-specific parameters"""
         if len(historical_data) < 14:
             return [max(0, historical_data[-1]) for _ in range(days_ahead)]
         
         try:
-            # Enhanced exponential smoothing (fallback)
-            exp_pred = AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+            # Ensemble prediction combining multiple methods
+            predictions = []
             
-            # Disease-specific specialized model
-            specialized_pred = AIPredictor.disease_specific_model(historical_data, days_ahead, disease_params)
+            # Method 1: Exponential smoothing with trend
+            alpha, beta = 0.3, 0.1
+            smoothed = [historical_data[0]]
+            trend = [0]
             
-            # Simple ensemble of available models
-            final_prediction = AIPredictor.simple_ensemble([exp_pred, specialized_pred])
+            for i in range(1, len(historical_data)):
+                s_prev, t_prev = smoothed[-1], trend[-1]
+                s_new = alpha * historical_data[i] + (1 - alpha) * (s_prev + t_prev)
+                t_new = beta * (s_new - s_prev) + (1 - beta) * t_prev
+                smoothed.append(s_new)
+                trend.append(t_new)
             
-            return final_prediction
+            exp_predictions = []
+            for i in range(days_ahead):
+                pred = smoothed[-1] + trend[-1] * (i + 1)
+                exp_predictions.append(max(0, pred))
+            
+            # Method 2: Polynomial regression
+            X = np.array(range(len(historical_data))).reshape(-1, 1)
+            poly_features = PolynomialFeatures(degree=min(3, len(historical_data)//10))
+            X_poly = poly_features.fit_transform(X)
+            
+            model = LinearRegression()
+            model.fit(X_poly, historical_data)
+            
+            future_X = np.array(range(len(historical_data), len(historical_data) + days_ahead)).reshape(-1, 1)
+            future_X_poly = poly_features.transform(future_X)
+            poly_predictions = model.predict(future_X_poly)
+            poly_predictions = [max(0, p) for p in poly_predictions]
+            
+            # Method 3: Seasonal decomposition (simplified)
+            seasonal_factor = np.sin(2 * np.pi * np.array(range(days_ahead)) / 7) * 0.1 + 1
+            seasonal_predictions = [historical_data[-1] * factor for factor in seasonal_factor]
+            
+            # Ensemble with weights
+            ensemble_predictions = []
+            weights = [0.4, 0.4, 0.2]  # Exponential, Polynomial, Seasonal
+            
+            for i in range(days_ahead):
+                weighted_pred = (
+                    exp_predictions[i] * weights[0] +
+                    poly_predictions[i] * weights[1] +
+                    seasonal_predictions[i] * weights[2]
+                )
+                
+                # Apply disease-specific constraints
+                if disease_params:
+                    # Prevent unrealistic growth
+                    max_growth = historical_data[-1] * 1.1  # Max 10% daily growth
+                    weighted_pred = min(weighted_pred, max_growth)
+                
+                ensemble_predictions.append(max(0, weighted_pred))
+            
+            return ensemble_predictions
             
         except Exception as e:
-            st.warning(f"Advanced prediction failed: {e}")
-            # Fallback to enhanced exponential smoothing
-            return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
+            st.warning(f"AI prediction error: {str(e)}")
+            # Simple fallback
+            recent_avg = np.mean(historical_data[-7:])
+            recent_trend = np.mean(np.diff(historical_data[-14:]))
+            return [max(0, recent_avg + recent_trend * i) for i in range(1, days_ahead + 1)]
 
+# SIR Model Implementation
+class SIRModel:
     @staticmethod
-    def disease_specific_model(historical_data, days_ahead, disease_params):
-        """Disease-specific prediction models"""
-        if not disease_params:
-            return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, None)
-        
-        disease_type = disease_params.get('disease', 'COVID-19')
-        
-        if disease_type == "Influenza":
-            # Strong seasonal model for flu
-            return AIPredictor.seasonal_prediction(historical_data, days_ahead, seasonal_strength=0.8)
-        elif disease_type == "Dengue":
-            # Climate-dependent model
-            return AIPredictor.climate_based_prediction(historical_data, days_ahead)
-        elif disease_type == "COVID-19":
-            # Variant-aware model
-            return AIPredictor.variant_aware_prediction(historical_data, days_ahead, disease_params)
-        else:
-            return AIPredictor.enhanced_exponential_smoothing(historical_data, days_ahead, disease_params)
-
-    @staticmethod
-    def enhanced_exponential_smoothing(historical_data, days_ahead, disease_params):
-        """Enhanced exponential smoothing with disease parameters"""
-        if len(historical_data) < 3:
-            return [max(1, historical_data[-1]) for _ in range(days_ahead)]
-        
-        # Adaptive parameters based on disease
-        if disease_params:
-            # More responsive for fast-changing diseases
-            alpha = 0.4 if disease_params.get('basic_r0', 1) > 2.0 else 0.2
-            beta = 0.2 if disease_params.get('basic_r0', 1) > 2.0 else 0.1
-        else:
-            alpha, beta = 0.3, 0.1
-        
-        # Double exponential smoothing
-        smoothed = [historical_data[0]]
-        trend = [0]
-        
-        for i in range(1, len(historical_data)):
-            s = alpha * historical_data[i] + (1 - alpha) * (smoothed[i-1] + trend[i-1])
-            t = beta * (s - smoothed[i-1]) + (1 - beta) * trend[i-1]
-            smoothed.append(s)
-            trend.append(t)
-        
-        # Generate predictions with trend damping
-        predictions = []
-        for i in range(days_ahead):
-            # Dampen trend over time
-            damping = 0.98 ** i  # Trend reduces by 2% each day
-            pred = smoothed[-1] + trend[-1] * (i + 1) * damping
-            predictions.append(max(1, int(pred)))
-        
-        return predictions
-
-    @staticmethod
-    def simple_ensemble(predictions_list):
-        """Simple ensemble with equal weights"""
-        if not predictions_list:
-            return [1] * 30
-        
-        # Filter out failed predictions (None or empty)
-        valid_predictions = [p for p in predictions_list if p and len(p) > 0]
-        
-        if not valid_predictions:
-            return [1] * 30
-        
-        days_ahead = len(valid_predictions[0])
-        
-        # Simple average ensemble
-        ensemble_pred = []
-        for day in range(days_ahead):
-            day_predictions = [pred[day] for pred in valid_predictions if day < len(pred)]
-            if day_predictions:
-                avg_pred = np.mean(day_predictions)
-                ensemble_pred.append(max(1, int(avg_pred)))
-            else:
-                ensemble_pred.append(1)
-        
-        return ensemble_pred
-
-# Enhanced SIR Model with High-Risk Groups
-class EnhancedSIRModel:
-    @staticmethod
-    def run_modified_sir_simulation(N, I0, R0, beta, gamma, delta, days, disease, interventions=None, vaccination_rate=0):
-        """Run modified SIR/SIRD model with high-risk groups and interventions"""
-        
-        # Get high-risk group data
-        risk_groups = HIGH_RISK_GROUPS.get(disease, {})
-        
-        # Initialize populations
-        S_general = N - I0 - R0
-        I_general = I0
-        R_general = R0
-        D_general = 0
-        V_general = 0  # Vaccinated
-        
-        # High-risk group populations
-        S_risk, I_risk, R_risk, D_risk, V_risk = {}, {}, {}, {}, {}
-        
-        for group_name, group_data in risk_groups.items():
-            group_pop = int(N * group_data["proportion"])
-            S_risk[group_name] = group_pop
-            I_risk[group_name] = 0
-            R_risk[group_name] = 0
-            D_risk[group_name] = 0
-            V_risk[group_name] = 0
-            
-            # Adjust general population
-            S_general -= group_pop
-        
-        # Storage for results
-        results = {
-            'S_general': [S_general], 'I_general': [I_general], 'R_general': [R_general], 
-            'D_general': [D_general], 'V_general': [V_general],
-            'S_risk': {group: [S_risk[group]] for group in risk_groups},
-            'I_risk': {group: [I_risk[group]] for group in risk_groups},
-            'R_risk': {group: [R_risk[group]] for group in risk_groups},
-            'D_risk': {group: [D_risk[group]] for group in risk_groups},
-            'V_risk': {group: [V_risk[group]] for group in risk_groups},
-            'total_cases': [I0 + R0],
-            'daily_cases': [I0],
-            'hospital_burden': [I0 * 0.05],
-            'r_effective': []
-        }
-        
-        for day in range(days):
-            # Apply interventions
-            current_beta = beta
-            if interventions:
-                for intervention in interventions:
-                    if intervention in INTERVENTION_CONFIG:
-                        reduction = INTERVENTION_CONFIG[intervention]["transmission_reduction"]
-                        current_beta *= (1 - reduction)
-            
-            # Calculate effective R
-            total_susceptible = S_general + sum(S_risk.values())
-            r_eff = current_beta / gamma * (total_susceptible / N) if gamma > 0 and N > 0 else 0
-            results['r_effective'].append(min(5, max(0, r_eff)))
-            
-            # General population dynamics
-            new_infections_general = 0
-            if N > 0 and S_general > 0:
-                # Vaccination
-                daily_vaccination = min(S_general * vaccination_rate, S_general)
-                S_general = max(0, S_general - daily_vaccination)
-                V_general += daily_vaccination
-                
-                # Disease transmission
-                new_infections_general = current_beta * S_general * I_general / N
-                new_recoveries_general = gamma * I_general
-                new_deaths_general = delta * I_general
-                
-                S_general = max(0, S_general - new_infections_general)
-                I_general = max(0, I_general + new_infections_general - new_recoveries_general - new_deaths_general)
-                R_general = max(0, R_general + new_recoveries_general)
-                D_general = max(0, D_general + new_deaths_general)
-            
-            # High-risk group dynamics
-            total_new_infections = new_infections_general
-            
-            for group_name, group_data in risk_groups.items():
-                risk_mult = group_data["risk_multiplier"]
-                mort_mult = group_data["mortality_multiplier"]
-                
-                if N > 0 and S_risk[group_name] > 0:
-                    # Vaccination for risk groups (prioritized)
-                    daily_vaccination_risk = min(S_risk[group_name] * vaccination_rate * 1.5, S_risk[group_name])
-                    S_risk[group_name] = max(0, S_risk[group_name] - daily_vaccination_risk)
-                    V_risk[group_name] += daily_vaccination_risk
-                    
-                    # Enhanced transmission for high-risk
-                    new_infections_risk = current_beta * risk_mult * S_risk[group_name] * (I_general + sum(I_risk.values())) / N
-                    new_recoveries_risk = gamma * I_risk[group_name]
-                    new_deaths_risk = delta * mort_mult * I_risk[group_name]
-                    
-                    S_risk[group_name] = max(0, S_risk[group_name] - new_infections_risk)
-                    I_risk[group_name] = max(0, I_risk[group_name] + new_infections_risk - new_recoveries_risk - new_deaths_risk)
-                    R_risk[group_name] = max(0, R_risk[group_name] + new_recoveries_risk)
-                    D_risk[group_name] = max(0, D_risk[group_name] + new_deaths_risk)
-                    
-                    total_new_infections += new_infections_risk
-            
-            # Store results
-            results['S_general'].append(S_general)
-            results['I_general'].append(I_general)
-            results['R_general'].append(R_general)
-            results['D_general'].append(D_general)
-            results['V_general'].append(V_general)
-            
-            for group_name in risk_groups:
-                results['S_risk'][group_name].append(S_risk[group_name])
-                results['I_risk'][group_name].append(I_risk[group_name])
-                results['R_risk'][group_name].append(R_risk[group_name])
-                results['D_risk'][group_name].append(D_risk[group_name])
-                results['V_risk'][group_name].append(V_risk[group_name])
-            
-            # Aggregate metrics
-            total_infected = I_general + sum(I_risk.values())
-            total_cases = (R_general + sum(R_risk.values()) + 
-                          D_general + sum(D_risk.values()) + 
-                          I_general + sum(I_risk.values()))
-            
-            results['total_cases'].append(total_cases)
-            results['daily_cases'].append(total_new_infections)
-            results['hospital_burden'].append(total_infected * 0.05)  # 5% hospitalization rate
-        
-        return results
+    def run_sir_simulation(
+    N, I0, R0, D0, beta_0, beta_hr, f_hr, gamma, delta, v, e, num_days
+):
+        S = N - I0 - R0 - D0  # Account for deceased individuals
+        I = I0
+        R = R0
+        D = D0  # Start with an initial number of deceased individuals
     
-    @staticmethod
-    def calculate_intervention_impact(base_r0, interventions):
-        """Calculate combined impact of multiple interventions"""
-        combined_reduction = 0
-        total_cost = 0
-        
-        for intervention in interventions:
-            if intervention in INTERVENTION_CONFIG:
-                config = INTERVENTION_CONFIG[intervention]
-                combined_reduction += config["transmission_reduction"]
-                total_cost += config["implementation_cost"]
-        
-        # Cap reduction at 95%
-        combined_reduction = min(0.95, combined_reduction)
-        effective_r0 = base_r0 * (1 - combined_reduction)
-        
-        return effective_r0, combined_reduction * 100, total_cost
+        susceptible = [S]
+        infected = [I]
+        recovered = [R]
+        deceased = [D]
+    
+        # Effective transmission rate due to high-risk group interactions
+        beta_eff = beta_0 + f_hr * (beta_hr - beta_0)
+    
+        for _ in range(num_days):
+            # Vaccination effect
+            vaccinated = v * S  # Number of vaccinated individuals per day
+            directly_immune = vaccinated * e  # Vaccinated individuals gaining full immunity
+            partially_immune = vaccinated * (1 - e)  # Remaining partially immune population
+    
+            S_new = S - beta_eff * S * I / N - vaccinated  # Remove vaccinated from susceptible
+            I_new = I + beta_eff * S * I / N - gamma * I - delta * I
+            R_new = R + gamma * I + directly_immune  # Add directly immune to recovered
+            D_new = D + delta * I
+    
+            S, I, R, D = S_new, I_new, R_new, D_new
+    
+            susceptible.append(S)
+            infected.append(I)
+            recovered.append(R)
+            deceased.append(D)
+    
+        return susceptible, infected, recovered, deceased
 
 # Vaccination Centers Data
 def get_vaccination_centers_by_disease(disease):
@@ -1317,53 +761,15 @@ def main():
         # Historical trends and AI predictions
         st.markdown("### 📈 Historical Trends & AI Predictions")
         
-        # Fetch real historical data from API
-        try:
-            # Get historical data from disease.sh API
-            country_config = COUNTRY_CONFIG.get(country, COUNTRY_CONFIG["Global"])
-            api_code = country_config["api_code"]
-            
-            if disease == "COVID-19":
-                if api_code == "all":
-                    historical_url = "https://disease.sh/v3/covid-19/historical/all?lastdays=120"
-                else:
-                    historical_url = f"https://disease.sh/v3/covid-19/historical/{api_code}?lastdays=120"
-                
-                response = requests.get(historical_url, timeout=10)
-                
-                if response.status_code == 200:
-                    hist_data = response.json()
-                    if api_code == "all":
-                        cases_data = hist_data.get("cases", {})
-                    else:
-                        cases_data = hist_data.get("timeline", {}).get("cases", {})
-                    
-                    # Convert to list of daily cases
-                    historical_data = list(cases_data.values())[-120:] if cases_data else []
-                    
-                    # Calculate daily new cases from cumulative
-                    if len(historical_data) > 1:
-                        daily_cases = [historical_data[0]]
-                        for i in range(1, len(historical_data)):
-                            daily_new = max(0, historical_data[i] - historical_data[i-1])
-                            daily_cases.append(daily_new)
-                        historical_data = daily_cases
-                else:
-                    raise Exception("API call failed")
-            
-            else:
-                # For non-COVID diseases, generate realistic data
-                historical_data = AIPredictor.generate_historical_data(current_data, 120)
-                
-        except Exception as e:
-            st.warning(f"Using simulated historical data: {str(e)}")
-            historical_data = AIPredictor.generate_historical_data(current_data, 120)
-
+        # Generate historical data
+        ai_predictor = AIPredictor()
+        historical_data = ai_predictor.generate_historical_data(current_data, 120)
+        
         # Generate AI predictions
         disease_params = DISEASE_CONFIG.get(disease, DISEASE_CONFIG["COVID-19"])
-        future_predictions = AIPredictor.predict_future_trend(historical_data[-60:], 30, disease_params)
+        future_predictions = ai_predictor.predict_future_trend(historical_data[-60:], 30, disease_params)
         
-        # Create comprehensive chart
+        # Create visualization
         fig = go.Figure()
         
         # Historical data
@@ -1421,8 +827,8 @@ def main():
         # Current situation analysis
         st.markdown("### 🤖 AI Situation Analysis")
         
-        recent_trend = np.mean(np.diff(historical_data[-14:])) if len(historical_data) >= 14 else 0
-        prediction_trend = np.mean(np.diff(future_predictions[:14])) if len(future_predictions) >= 14 else 0
+        recent_trend = np.mean(np.diff(historical_data[-14:]))
+        prediction_trend = np.mean(np.diff(future_predictions[:14]))
         
         col1, col2 = st.columns(2)
         
@@ -1681,129 +1087,33 @@ def main():
             
             total_score = primary_score + secondary_score + risk_score
             
-            # Enhanced risk assessment with high-risk group consideration
             if st.button("🔍 AI Risk Assessment", type="primary"):
-                st.markdown("#### 👥 High-Risk Group Assessment")
-                
-                # Check if user belongs to high-risk groups
-                user_risk_groups = []
-                age_input = st.number_input("Your age:", min_value=0, max_value=120, value=30, key="age_risk")
-                
-                # Age-based risk
-                if disease in ["COVID-19", "Influenza"] and age_input >= 65:
-                    user_risk_groups.append("Elderly (65+)")
-                elif disease == "Dengue" and age_input <= 18:
-                    user_risk_groups.append("Children/Teens")
-                
-                # Condition-based risk
-                has_diabetes = st.checkbox("Do you have diabetes?", key="diabetes_check")
-                has_heart_disease = st.checkbox("Do you have heart disease?", key="heart_check")
-                has_respiratory = st.checkbox("Do you have respiratory conditions?", key="resp_check")
-                is_immunocompromised = st.checkbox("Are you immunocompromised?", key="immune_check")
-                is_pregnant = st.checkbox("Are you pregnant?", key="pregnant_check")
-                is_healthcare_worker = st.checkbox("Are you a healthcare worker?", key="hcw_check")
-                
-                # Add relevant risk groups
-                if has_diabetes and disease == "COVID-19":
-                    user_risk_groups.append("Diabetes")
-                if has_heart_disease and disease == "COVID-19":
-                    user_risk_groups.append("Heart Disease")
-                if has_respiratory and disease == "COVID-19":
-                    user_risk_groups.append("Respiratory Disease")
-                if is_immunocompromised:
-                    user_risk_groups.append("Immunocompromised")
-                if is_pregnant and disease in ["Influenza", "Dengue"]:
-                    user_risk_groups.append("Pregnant Women")
-                if is_healthcare_worker and disease == "Mpox":
-                    user_risk_groups.append("Healthcare Workers")
-                
-                # Calculate enhanced risk score
-                risk_multiplier = 1.0
-                mortality_multiplier = 1.0
-                
-                disease_risk_groups = HIGH_RISK_GROUPS.get(disease, {})
-                for group in user_risk_groups:
-                    if group in disease_risk_groups:
-                        group_data = disease_risk_groups[group]
-                        risk_multiplier = max(risk_multiplier, group_data["risk_multiplier"])
-                        mortality_multiplier = max(mortality_multiplier, group_data["mortality_multiplier"])
-                
-                enhanced_risk_score = total_score * risk_multiplier
-                
-                # Display enhanced risk assessment
-                if user_risk_groups:
-                    st.warning(f"⚠️ **High-Risk Groups Identified:** {', '.join(user_risk_groups)}")
-                    st.metric("🔢 Enhanced Risk Score", f"{enhanced_risk_score:.1f}")
-                    st.metric("📈 Infection Risk Multiplier", f"{risk_multiplier:.1f}x")
-                    st.metric("💀 Mortality Risk Multiplier", f"{mortality_multiplier:.1f}x")
-                    
-                    if enhanced_risk_score >= 15:
-                        st.markdown('<div class="alert-card">🚨 CRITICAL RISK - Immediate medical consultation required</div>', unsafe_allow_html=True)
-                        st.error("You are in a high-risk category with concerning symptoms. Seek immediate medical attention.")
-                    elif enhanced_risk_score >= 10:
-                        st.markdown('<div class="risk-high">🔴 HIGH RISK - Priority medical consultation needed</div>', unsafe_allow_html=True)
-                        st.warning("High-risk status with symptoms detected. Contact healthcare provider urgently.")
-                    elif enhanced_risk_score >= 5:
-                        st.markdown('<div class="risk-medium">🟡 ELEVATED RISK - Enhanced monitoring required</div>', unsafe_allow_html=True)
-                        st.info("You're in a risk group. Monitor symptoms closely and consider testing.")
-                else:
-                    st.success("✅ No high-risk group factors identified")
-                
-                # Standard risk assessment
+                # Risk assessment
                 if total_score >= 12:
-                    st.markdown('<div class="alert-card">🚨 VERY HIGH RISK - Seek immediate medical attention</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="risk-high">🚨 VERY HIGH RISK - Seek immediate medical attention</div>', unsafe_allow_html=True)
+                    st.error("Your symptoms strongly suggest possible infection. Contact healthcare immediately.")
                 elif total_score >= 7:
-                    st.markdown('<div class="risk-high">🔴 MODERATE RISK - Consult healthcare provider</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="risk-medium">⚠️ MODERATE RISK - Medical consultation recommended</div>', unsafe_allow_html=True)
+                    st.warning("Some concerning symptoms present. Consider getting tested and consulting a doctor.")
                 elif total_score >= 3:
-                    st.markdown('<div class="risk-medium">🟡 LOW-MODERATE RISK - Monitor symptoms</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="risk-medium">⚠️ LOW-MODERATE RISK - Monitor symptoms</div>', unsafe_allow_html=True)
+                    st.info("Mild symptoms detected. Continue monitoring and follow prevention guidelines.")
                 else:
-                    st.markdown('<div class="risk-low">✅ LOW RISK - Continue preventive measures</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="risk-low">✅ LOW RISK - Continue precautions</div>', unsafe_allow_html=True)
+                    st.success("No significant symptoms detected. Maintain standard health precautions.")
                 
-                # Personalized recommendations
-                st.markdown("#### 🎯 Personalized Recommendations")
-                
-                recommendations = []
-                if user_risk_groups:
-                    recommendations.extend([
-                        "🏥 Prioritize vaccination if available",
-                        "😷 Wear high-quality masks in public",
-                        "🏠 Minimize exposure to crowded areas",
-                        "📞 Stay in close contact with healthcare provider"
-                    ])
-                
-                if enhanced_risk_score > 10 or total_score > 10:
-                    recommendations.extend([
-                        "🚨 Seek immediate medical evaluation",
-                        "🧪 Get tested as soon as possible",
-                        "🏠 Self-isolate until evaluated"
-                    ])
-                elif enhanced_risk_score > 5 or total_score > 5:
-                    recommendations.extend([
-                        "🩺 Schedule medical consultation",
-                        "📊 Monitor symptoms daily",
-                        "🧪 Consider getting tested"
-                    ])
-                
-                for rec in recommendations[:6]:  # Show top 6 recommendations
-                    st.markdown(f"- {rec}")
-                
-                # Save enhanced symptom data
-                enhanced_symptom_data = {
+                # Save to CSV
+                symptom_data = {
                     'disease': disease,
                     'country': country,
-                    'age': age_input,
                     'primary_score': primary_score,
                     'secondary_score': secondary_score,
                     'risk_score': risk_score,
                     'total_score': total_score,
-                    'high_risk_groups': ', '.join(user_risk_groups),
-                    'risk_multiplier': risk_multiplier,
-                    'mortality_multiplier': mortality_multiplier,
-                    'enhanced_risk_score': enhanced_risk_score,
-                    'risk_level': 'Critical' if enhanced_risk_score >= 15 else 'High' if enhanced_risk_score >= 10 else 'Elevated' if enhanced_risk_score >= 5 else 'Standard'
+                    'risk_level': 'Very High' if total_score >= 12 else 'Moderate' if total_score >= 7 else 'Low-Moderate' if total_score >= 3 else 'Low'
                 }
                 
-                st.session_state.csv_manager.add_symptom_report(enhanced_symptom_data)
+                st.session_state.csv_manager.add_symptom_report(symptom_data)
         
         with col2:
             st.markdown("### 📊 Disease Information")
@@ -1846,9 +1156,7 @@ def main():
             # Current statistics
             st.markdown("### 📈 Current Statistics")
             st.metric("Global Cases", f"{current_data['total_cases']:,}")
-            if current_data['total_cases'] > 0:
-                mortality_rate = (current_data['deaths'] / current_data['total_cases']) * 100
-                st.metric("Case Fatality Rate", f"{mortality_rate:.2f}%")
+            st.metric("Case Fatality Rate", f"{mortality_rate:.2f}%")
             st.metric("Basic R₀", f"{disease_params['basic_r0']}")
     
     # TAB 4: Vaccination System
@@ -2006,7 +1314,7 @@ def main():
             st.metric("Vaccination Coverage", f"{vaccination_rate:.1f}%")
             
             # Herd immunity threshold
-            herd_immunity_threshold = (1 - 1/disease_params["basic_r0"]) * 100 if disease_params["basic_r0"] > 1 else 0
+            herd_immunity_threshold = (1 - 1/disease_params["basic_r0"]) * 100
             st.metric("Herd Immunity Threshold", f"{herd_immunity_threshold:.1f}%")
             
             if vaccination_rate >= herd_immunity_threshold:
@@ -2082,27 +1390,23 @@ def main():
                 severity_color = {"High": "🔴", "Medium": "🟡", "Low": "🟢"}[alert["severity"]]
                 st.markdown(f"**{alert['date']}** {severity_color} - {alert['type']}: {alert['message']}")
     
-    # TAB 6: Enhanced SIR Modeling with High-Risk Groups
+    # TAB 6: SIR Modeling
     with tab6:
-        st.markdown("## 📊 Advanced SIR Disease Modeling with High-Risk Groups")
+        st.markdown("## 📊 Advanced SIR Disease Modeling")
         
         # Model parameters
-        st.markdown("### ⚙️ Enhanced Model Parameters")
+        st.markdown("### ⚙️ Model Parameters")
         
         param_col1, param_col2, param_col3 = st.columns(3)
         
         with param_col1:
             st.markdown("**Population Parameters:**")
             N = current_data['population']
-            st.metric("👥 Total Population", f"{N:,}")
+            st.metric("👥 Population", f"{N:,}")
             I0 = st.number_input("Initial Infected:", min_value=1, 
                                value=max(1, current_data['active_cases']), step=1)
             R0 = st.number_input("Initial Recovered:", min_value=0, 
                                value=current_data['recovered'], step=1)
-            
-            # Vaccination parameters
-            vaccination_rate = st.slider("Daily Vaccination Rate (% of population):", 
-                                        min_value=0.0, max_value=2.0, value=0.1, step=0.05) / 100
         
         with param_col2:
             st.markdown("**Disease Parameters:**")
@@ -2115,311 +1419,130 @@ def main():
             delta = st.number_input("Death Rate (δ):", 
                                   min_value=0.001, max_value=0.1, 
                                   value=disease_params["death_rate"], step=0.001)
-            
-            # Calculate basic R₀
-            R_basic = beta / gamma if gamma > 0 else 0
-            st.metric("🔬 Basic R₀", f"{R_basic:.2f}")
         
         with param_col3:
-            st.markdown("**Intervention Strategies:**")
-            selected_interventions = st.multiselect(
-                "Select Interventions:",
-                list(INTERVENTION_CONFIG.keys()),
-                default=["Basic Hygiene"]
-            )
-            
-            # Calculate intervention impact
-            enhanced_sir = EnhancedSIRModel()
-            effective_r0, reduction_percent, total_cost = enhanced_sir.calculate_intervention_impact(R_basic, selected_interventions)
-            
-            st.metric("📉 Effective R₀", f"{effective_r0:.2f}")
-            st.metric("📊 Transmission Reduction", f"{reduction_percent:.1f}%")
-            st.metric("💰 Implementation Cost", f"{total_cost}/10")
-            
+            st.markdown("**Simulation Settings:**")
             simulation_days = st.number_input("Simulation Days:", min_value=30, max_value=730, value=365)
-        
-        # High-risk group display
-        st.markdown("### 👥 High-Risk Group Configuration")
-        
-        risk_groups = HIGH_RISK_GROUPS.get(disease, {})
-        
-        if risk_groups:
-            risk_col1, risk_col2 = st.columns(2)
             
-            with risk_col1:
-                st.markdown("**Risk Group Demographics:**")
-                risk_data = []
-                total_risk_pop = 0
-                
-                for group_name, group_data in risk_groups.items():
-                    group_pop = int(N * group_data["proportion"])
-                    total_risk_pop += group_pop
-                    risk_data.append({
-                        'Group': group_name,
-                        'Population': f"{group_pop:,}",
-                        'Percentage': f"{group_data['proportion']*100:.1f}%",
-                        'Risk Multiplier': f"{group_data['risk_multiplier']:.1f}x",
-                        'Mortality Multiplier': f"{group_data['mortality_multiplier']:.1f}x"
-                    })
-                
-                df_risk = pd.DataFrame(risk_data)
-                st.dataframe(df_risk, use_container_width=True)
-                
-                st.info(f"Total high-risk population: {total_risk_pop:,} ({(total_risk_pop/N)*100:.1f}%)")
+            # Calculate R₀
+            R_basic = beta / gamma if gamma > 0 else 0
+            st.metric("🔬 Basic R₀", f"{R_basic:.2f}")
             
-            with risk_col2:
-                # Risk group visualization
-                fig_risk = px.pie(
-                    values=[group_data["proportion"] for group_data in risk_groups.values()],
-                    names=list(risk_groups.keys()),
-                    title=f"{disease} High-Risk Groups Distribution",
-                    color_discrete_sequence=px.colors.qualitative.Set3
-                )
-                st.plotly_chart(fig_risk, use_container_width=True)
-        else:
-            st.info(f"No specific high-risk groups defined for {disease}")
-        
-                
-            # Run the enhanced model
-            sir_results = enhanced_sir.run_modified_sir_simulation(
-                N, I0, R0, beta, gamma, delta, simulation_days, 
-                disease, selected_interventions, vaccination_rate
-            )
-            
-            # Create comprehensive visualization
-            fig_enhanced = make_subplots(
-                rows=3, cols=2,
-                subplot_titles=(
-                    "Overall Population Dynamics", "High-Risk Groups Infection",
-                    "R-effective & Intervention Impact", "Hospital Burden & Capacity",
-                    "Vaccination Progress", "Mortality by Risk Group"
-                ),
-                specs=[[{"secondary_y": True}, {"type": "scatter"}],
-                       [{"type": "scatter"}, {"type": "scatter"}],
-                       [{"type": "scatter"}, {"type": "bar"}]]
-            )
-            
-            days_range = list(range(len(sir_results['S_general'])))
-            
-            # Plot 1: Overall population dynamics
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=sir_results['S_general'], 
-                name="Susceptible", line=dict(color='blue', width=3)
-            ), row=1, col=1)
-            
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=sir_results['I_general'], 
-                name="Infected", line=dict(color='red', width=3)
-            ), row=1, col=1)
-            
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=sir_results['R_general'], 
-                name="Recovered", line=dict(color='green', width=3)
-            ), row=1, col=1)
-            
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=sir_results['V_general'], 
-                name="Vaccinated", line=dict(color='purple', width=2, dash='dash')
-            ), row=1, col=1)
-            
-            # Plot 2: High-risk group infections
-            colors = ['darkred', 'orange', 'darkblue', 'darkgreen', 'purple']
-            for i, (group_name, infections) in enumerate(sir_results['I_risk'].items()):
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=infections,
-                    name=f"{group_name}", 
-                    line=dict(color=colors[i % len(colors)], width=2)
-                ), row=1, col=2)
-            
-            # Plot 3: R-effective over time
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range[1:], y=sir_results['r_effective'],
-                name="R-effective", line=dict(color='purple', width=3)
-            ), row=2, col=1)
-            fig_enhanced.add_hline(y=1, line_dash="dash", line_color="red", row=2, col=1)
-            
-            # Plot 4: Hospital burden
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=sir_results['hospital_burden'],
-                name="Hospital Beds Needed", line=dict(color='darkred', width=3)
-            ), row=2, col=2)
-            
-            # Hospital capacity line (assume 0.5% of population)
-            hospital_capacity = N * 0.005
-            fig_enhanced.add_hline(y=hospital_capacity, line_dash="dash", 
-                                 line_color="red", row=2, col=2, 
-                                 annotation_text="Hospital Capacity")
-            
-            # Plot 5: Vaccination progress
-            total_vaccinated = [sir_results['V_general'][i] + sum(
-                sir_results['V_risk'][group][i] for group in risk_groups
-            ) for i in range(len(days_range))]
-            
-            vaccination_percentage = [(v/N)*100 for v in total_vaccinated]
-            
-            fig_enhanced.add_trace(go.Scatter(
-                x=days_range, y=vaccination_percentage,
-                name="Vaccination %", line=dict(color='green', width=3)
-            ), row=3, col=1)
-            
-            # Herd immunity threshold
-            herd_immunity = (1 - 1/R_basic) * 100 if R_basic > 1 else 0
-            fig_enhanced.add_hline(y=herd_immunity, line_dash="dash", 
-                                 line_color="green", row=3, col=1,
-                                 annotation_text="Herd Immunity")
-            
-            # Plot 6: Mortality by risk group
-            final_deaths = [sir_results['D_general'][-1]]
-            death_labels = ['General Population']
-            
-            for group_name in risk_groups:
-                final_deaths.append(sir_results['D_risk'][group_name][-1])
-                death_labels.append(group_name)
-            
-            fig_enhanced.add_trace(go.Bar(
-                x=death_labels, y=final_deaths,
-                name="Final Deaths", marker_color='darkred'
-            ), row=3, col=2)
-            
-            fig_enhanced.update_layout(
-                height=1200, 
-                showlegend=True, 
-                title_text=f"Enhanced SIR Model Analysis - {disease} in {country}"
-            )
-            
-            st.plotly_chart(fig_enhanced, use_container_width=True)
-            
-            st.markdown("""
-            <div class="graph-explanation">
-            <strong>📊 Enhanced SIR Model Explanation:</strong> This comprehensive model shows disease progression 
-            across different population groups. Top row shows overall dynamics and high-risk group infections. 
-            Middle row displays R-effective trends and hospital burden vs capacity. Bottom row shows vaccination 
-            progress and mortality distribution across risk groups.
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Enhanced analytics
-            st.markdown("### 📈 Comprehensive Model Analytics")
-            
-            analytics_col1, analytics_col2, analytics_col3, analytics_col4 = st.columns(4)
-            
-            with analytics_col1:
-                peak_infections = max(sir_results['I_general'])
-                peak_day = sir_results['I_general'].index(peak_infections)
-                st.metric("🔴 Peak Infections", f"{int(peak_infections):,}", f"Day {peak_day}")
-                
-                # Total infected across all groups
-                total_peak = peak_infections + sum(max(sir_results['I_risk'][group]) for group in risk_groups)
-                st.metric("🔴 Total Peak (All Groups)", f"{int(total_peak):,}")
-            
-            with analytics_col2:
-                final_attack_rate = (sir_results['total_cases'][-1] / N) * 100
-                st.metric("🎯 Final Attack Rate", f"{final_attack_rate:.1f}%")
-                
-                # Vaccination coverage at end
-                final_vacc_rate = (total_vaccinated[-1] / N) * 100
-                st.metric("💉 Final Vaccination Rate", f"{final_vacc_rate:.1f}%")
-            
-            with analytics_col3:
-                total_final_deaths = sir_results['D_general'][-1] + sum(
-                    sir_results['D_risk'][group][-1] for group in risk_groups
-                )
-                final_cfr = (total_final_deaths / sir_results['total_cases'][-1]) * 100 if sir_results['total_cases'][-1] > 0 else 0
-                st.metric("💀 Case Fatality Rate", f"{final_cfr:.2f}%")
-                
-                # Hospital overflow days
-                overflow_days = sum(1 for burden in sir_results['hospital_burden'] if burden > hospital_capacity)
-                st.metric("🏥 Hospital Overflow Days", f"{overflow_days}")
-            
-            with analytics_col4:
-                min_r_eff = min(sir_results['r_effective']) if sir_results['r_effective'] else R_basic
-                st.metric("📉 Minimum R-effective", f"{min_r_eff:.2f}")
-                
-                # Days to control (R < 1)
-                control_day = next((i for i, r in enumerate(sir_results['r_effective']) if r < 1), -1)
-                if control_day > 0:
-                    st.metric("⏱️ Days to Control", f"{control_day}")
-                else:
-                    st.metric("⏱️ Days to Control", "Not Achieved")
-            
-            # High-risk group analysis
-            if risk_groups:
-                st.markdown("### 👥 High-Risk Group Impact Analysis")
-                
-                risk_analysis_data = []
-                for group_name, group_data in risk_groups.items():
-                    group_deaths = sir_results['D_risk'][group_name][-1]
-                    group_infected = max(sir_results['I_risk'][group_name])
-                    
-                    risk_analysis_data.append({
-                        'Risk Group': group_name,
-                        'Peak Infections': f"{int(group_infected):,}",
-                        'Total Deaths': f"{int(group_deaths):,}",
-                        'Group CFR': f"{(group_deaths / max(1, group_infected)) * 100:.1f}%",
-                        'Population %': f"{group_data['proportion']*100:.1f}%"
-                    })
-                
-                df_risk_analysis = pd.DataFrame(risk_analysis_data)
-                st.dataframe(df_risk_analysis, use_container_width=True)
-            
-            # Policy recommendations based on model
-            st.markdown("### 🎯 AI-Generated Policy Recommendations")
-            
-            if effective_r0 > 1.5:
-                st.markdown('<div class="alert-card">🚨 CRITICAL: Immediate aggressive intervention required</div>', unsafe_allow_html=True)
-                recommendations = [
-                    "Implement immediate lockdown measures",
-                    "Surge hospital capacity preparation",
-                    "Accelerate vaccination for high-risk groups",
-                    "Enhance contact tracing and testing",
-                    "Public emergency communication"
-                ]
-            elif effective_r0 > 1.0:
-                st.markdown('<div class="risk-medium">⚠️ MODERATE: Enhanced measures needed</div>', unsafe_allow_html=True)
-                recommendations = [
-                    "Strengthen social distancing measures",
-                    "Increase vaccination coverage",
-                    "Monitor high-risk groups closely",
-                    "Prepare healthcare system",
-                    "Public awareness campaigns"
-                ]
+            if R_basic > 1:
+                st.warning("⚠️ R₀ > 1: Epidemic will spread")
             else:
-                st.markdown('<div class="risk-low">✅ CONTROLLED: Maintain current strategy</div>', unsafe_allow_html=True)
-                recommendations = [
-                    "Continue current interventions",
-                    "Monitor for variants/resurgence",
-                    "Focus on vaccination completion",
-                    "Prepare for seasonal changes",
-                    "Maintain surveillance systems"
-                ]
-            
-            for i, rec in enumerate(recommendations, 1):
-                st.markdown(f"{i}. {rec}")
-            
-            # Save comprehensive model results
-            model_data = {
-                'disease': disease,
-                'country': country,
-                'basic_r0': R_basic,
-                'effective_r0': effective_r0,
-                'interventions': ', '.join(selected_interventions),
-                'peak_infections': int(peak_infections),
-                'peak_day': peak_day,
-                'final_attack_rate': final_attack_rate,
-                'final_cfr': final_cfr,
-                'total_deaths': int(total_final_deaths),
-                'hospital_overflow_days': overflow_days,
-                'vaccination_rate': vaccination_rate * 100,
-                'simulation_days': simulation_days,
-                'high_risk_groups': len(risk_groups),
-                'transmission_reduction': reduction_percent,
-                'intervention_cost': total_cost
-            }
-            
-            st.session_state.csv_manager.add_model_result(model_data)
-            
-            st.success("✅ Model results saved to CSV storage")
-
+                st.success("✅ R₀ < 1: Epidemic will decline")
+        
+        # Run SIR simulation
+        if st.button("▶️ Run SIR Simulation", type="primary"):
+            with st.spinner("Running epidemiological simulation..."):
+                sir_model = SIRModel()
+                S_data, I_data, R_data, D_data = sir_model.run_sir_simulation(N, I0, R0, beta, gamma, delta, simulation_days)
+                
+                # Create comprehensive SIR visualization
+                fig_sir = make_subplots(
+                    rows=2, cols=2,
+                    subplot_titles=("SIR Model Results", "R-effective Over Time", "Attack Rate", "Healthcare Burden"),
+                    specs=[[{"secondary_y": True}, {"type": "scatter"}],
+                           [{"type": "scatter"}, {"type": "bar"}]]
+                )
+                
+                days = list(range(len(S_data)))
+                
+                # Main SIR plot
+                fig_sir.add_trace(go.Scatter(x=days, y=S_data, name="Susceptible", line=dict(color='blue')), row=1, col=1)
+                fig_sir.add_trace(go.Scatter(x=days, y=I_data, name="Infected", line=dict(color='red')), row=1, col=1)
+                fig_sir.add_trace(go.Scatter(x=days, y=R_data, name="Recovered", line=dict(color='green')), row=1, col=1)
+                fig_sir.add_trace(go.Scatter(x=days, y=D_data, name="Deaths", line=dict(color='black')), row=1, col=1)
+                
+                # R-effective calculation
+                r_eff_data = []
+                for i in range(len(S_data)):
+                    if N > 0 and gamma > 0:
+                        r_eff = beta * S_data[i] / (N * gamma)
+                        r_eff_data.append(min(5, max(0, r_eff)))
+                    else:
+                        r_eff_data.append(1.0)
+                
+                fig_sir.add_trace(go.Scatter(x=days, y=r_eff_data, name="R-effective", line=dict(color='purple')), row=1, col=2)
+                fig_sir.add_hline(y=1, line_dash="dash", line_color="red", row=1, col=2)
+                
+                # Attack rate
+                attack_rates = [(N - S) / N * 100 for S in S_data]
+                fig_sir.add_trace(go.Scatter(x=days, y=attack_rates, name="Attack Rate (%)", line=dict(color='orange')), row=2, col=1)
+                
+                # Healthcare burden (5% of infected need hospitalization)
+                hospital_burden = [I * 0.05 for I in I_data]
+                fig_sir.add_trace(go.Bar(x=days[::7], y=hospital_burden[::7], name="Hospital Beds Needed", marker_color='darkred'), row=2, col=2)
+                
+                fig_sir.update_layout(height=800, showlegend=True, title_text=f"SIR Model Analysis - {disease} in {country}")
+                
+                st.plotly_chart(fig_sir, use_container_width=True)
+                
+                st.markdown("""
+                <div class="graph-explanation">
+                <strong>📊 SIR Model Explanation:</strong> Shows disease progression over time. 
+                Susceptible (blue) decreases as people get infected. Infected (red) peaks then declines. 
+                Recovered (green) and Deaths (black) accumulate. R-effective below 1 indicates epidemic control.
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Model analytics
+                st.markdown("### 📈 Model Analytics")
+                
+                analytics_col1, analytics_col2, analytics_col3, analytics_col4 = st.columns(4)
+                
+                with analytics_col1:
+                    peak_infections = max(I_data)
+                    peak_day = I_data.index(peak_infections)
+                    st.metric("🔴 Peak Infections", f"{int(peak_infections):,}", f"Day {peak_day}")
+                
+                with analytics_col2:
+                    final_attack_rate = attack_rates[-1]
+                    st.metric("🎯 Final Attack Rate", f"{final_attack_rate:.1f}%")
+                
+                with analytics_col3:
+                    final_deaths = D_data[-1]
+                    final_cfr = (final_deaths / (R_data[-1] + final_deaths)) * 100 if (R_data[-1] + final_deaths) > 0 else 0
+                    st.metric("💀 Case Fatality Rate", f"{final_cfr:.2f}%")
+                
+                with analytics_col4:
+                    max_hospital_burden = max(hospital_burden)
+                    st.metric("🏥 Max Hospital Need", f"{int(max_hospital_burden):,}")
+                
+                # Policy recommendations
+                st.markdown("### 🎯 Policy Recommendations")
+                
+                if R_basic > 1.5:
+                    st.markdown('<div class="alert-card">🚨 Immediate intervention required: R₀ > 1.5</div>', unsafe_allow_html=True)
+                    st.markdown("- Implement strict social distancing measures")
+                    st.markdown("- Increase testing and contact tracing")
+                    st.markdown("- Prepare healthcare system for surge")
+                elif R_basic > 1.0:
+                    st.markdown('<div class="risk-medium">⚠️ Enhanced measures needed: R₀ > 1.0</div>', unsafe_allow_html=True)
+                    st.markdown("- Implement moderate interventions")
+                    st.markdown("- Monitor situation closely")
+                    st.markdown("- Increase public awareness")
+                else:
+                    st.markdown('<div class="risk-low">✅ Situation under control: R₀ < 1.0</div>', unsafe_allow_html=True)
+                    st.markdown("- Maintain current measures")
+                    st.markdown("- Prepare for potential resurgence")
+                    st.markdown("- Focus on vaccination if available")
+                
+                # Save model results
+                model_data = {
+                    'disease': disease,
+                    'country': country,
+                    'peak_infections': int(peak_infections),
+                    'peak_day': peak_day,
+                    'final_attack_rate': final_attack_rate,
+                    'r_basic': R_basic,
+                    'max_hospital_burden': int(max_hospital_burden),
+                    'simulation_days': simulation_days
+                }
+                
+                st.session_state.csv_manager.add_model_result(model_data)
+    
     # CSV Download Section
     st.markdown("---")
     st.markdown("## 📥 Data Export & Management")
