@@ -790,63 +790,63 @@ class EnhancedDataFetcher:
 # AI Prediction System
 class AIPredictor:
     @staticmethod
-def generate_historical_data(current_data, days=180, disease_params=None):
-    """Generate enhanced realistic historical data with disease-specific patterns"""
-    total_cases = current_data['total_cases']
-    active_cases = current_data['active_cases']
-    
-    # Disease-specific parameters
-    if disease_params:
-        disease_type = disease_params.get('disease', 'COVID-19')
-        r0 = disease_params.get('basic_r0', 2.5)
-        seasonality = disease_params.get('seasonal_strength', 0.3)
-    else:
-        disease_type = 'COVID-19'
-        r0 = 2.5
-        seasonality = 0.3
-    
-    historical_data = []
-    
-    for i in range(days):
-        t = i / days
+    def generate_historical_data(current_data, days=180, disease_params=None):
+        """Generate enhanced realistic historical data with disease-specific patterns"""
+        total_cases = current_data['total_cases']
+        active_cases = current_data['active_cases']
         
-        # Base epidemic curves based on disease type
-        if disease_type == "Influenza":
-            # Strong seasonal pattern for flu
-            seasonal_factor = 1 + seasonality * np.sin(2 * np.pi * t + np.pi/2)  # Peak in winter
-            wave1 = active_cases * 0.4 * np.exp(-((t - 0.15) * 10)**2) * seasonal_factor
-            wave2 = active_cases * 0.9 * np.exp(-((t - 0.75) * 8)**2) * seasonal_factor
-            wave3 = active_cases * 0.3 * np.exp(-((t - 0.95) * 15)**2) * seasonal_factor
+        # Disease-specific parameters
+        if disease_params:
+            disease_type = disease_params.get('disease', 'COVID-19')
+            r0 = disease_params.get('basic_r0', 2.5)
+            seasonality = disease_params.get('seasonal_strength', 0.3)
+        else:
+            disease_type = 'COVID-19'
+            r0 = 2.5
+            seasonality = 0.3
+        
+        historical_data = []
+        
+        for i in range(days):
+            t = i / days
             
-        elif disease_type == "Dengue":
-            # Monsoon-related pattern
-            monsoon_factor = 1 + 0.6 * np.sin(2 * np.pi * t + np.pi)  # Peak during monsoon
-            wave1 = active_cases * 0.5 * np.exp(-((t - 0.3) * 8)**2) * monsoon_factor
-            wave2 = active_cases * 0.8 * np.exp(-((t - 0.6) * 6)**2) * monsoon_factor
-            wave3 = active_cases * 0.4 * np.exp(-((t - 0.85) * 10)**2) * monsoon_factor
+            # Base epidemic curves based on disease type
+            if disease_type == "Influenza":
+                # Strong seasonal pattern for flu
+                seasonal_factor = 1 + seasonality * np.sin(2 * np.pi * t + np.pi/2)  # Peak in winter
+                wave1 = active_cases * 0.4 * np.exp(-((t - 0.15) * 10)**2) * seasonal_factor
+                wave2 = active_cases * 0.9 * np.exp(-((t - 0.75) * 8)**2) * seasonal_factor
+                wave3 = active_cases * 0.3 * np.exp(-((t - 0.95) * 15)**2) * seasonal_factor
+                
+            elif disease_type == "Dengue":
+                # Monsoon-related pattern
+                monsoon_factor = 1 + 0.6 * np.sin(2 * np.pi * t + np.pi)  # Peak during monsoon
+                wave1 = active_cases * 0.5 * np.exp(-((t - 0.3) * 8)**2) * monsoon_factor
+                wave2 = active_cases * 0.8 * np.exp(-((t - 0.6) * 6)**2) * monsoon_factor
+                wave3 = active_cases * 0.4 * np.exp(-((t - 0.85) * 10)**2) * monsoon_factor
+                
+            elif disease_type == "Mpox":
+                # More concentrated outbreaks
+                wave1 = active_cases * 0.6 * np.exp(-((t - 0.4) * 12)**2)
+                wave2 = active_cases * 0.4 * np.exp(-((t - 0.7) * 15)**2)
+                wave3 = active_cases * 0.2 * np.exp(-((t - 0.9) * 20)**2)
+                
+            else:  # COVID-19 default
+                # Multi-wave pattern with variants
+                wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)   # Original strain
+                wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Delta variant
+                wave3 = active_cases * 0.6 * np.exp(-((t - 0.8) * 9)**2)   # Omicron variant
             
-        elif disease_type == "Mpox":
-            # More concentrated outbreaks
-            wave1 = active_cases * 0.6 * np.exp(-((t - 0.4) * 12)**2)
-            wave2 = active_cases * 0.4 * np.exp(-((t - 0.7) * 15)**2)
-            wave3 = active_cases * 0.2 * np.exp(-((t - 0.9) * 20)**2)
+            combined_wave = wave1 + wave2 + wave3
             
-        else:  # COVID-19 default
-            # Multi-wave pattern with variants
-            wave1 = active_cases * 0.3 * np.exp(-((t - 0.2) * 8)**2)   # Original strain
-            wave2 = active_cases * 0.8 * np.exp(-((t - 0.5) * 6)**2)   # Delta variant
-            wave3 = active_cases * 0.6 * np.exp(-((t - 0.8) * 9)**2)   # Omicron variant
+            # Add realistic noise and weekly patterns
+            weekly_pattern = 1 + 0.1 * np.sin(2 * np.pi * i / 7)  # Weekly cycles
+            noise = np.random.lognormal(0, 0.15)  # Log-normal noise for realistic variation
+            
+            daily_cases = max(1, int(combined_wave * weekly_pattern * noise))
+            historical_data.append(daily_cases)
         
-        combined_wave = wave1 + wave2 + wave3
-        
-        # Add realistic noise and weekly patterns
-        weekly_pattern = 1 + 0.1 * np.sin(2 * np.pi * i / 7)  # Weekly cycles
-        noise = np.random.lognormal(0, 0.15)  # Log-normal noise for realistic variation
-        
-        daily_cases = max(1, int(combined_wave * weekly_pattern * noise))
-        historical_data.append(daily_cases)
-    
-    return historical_data
+        return historical_data
 
 @staticmethod
 def seasonal_prediction(historical_data, days_ahead, seasonal_strength=0.5):
@@ -2685,6 +2685,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
