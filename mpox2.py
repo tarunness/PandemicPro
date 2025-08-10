@@ -2179,250 +2179,247 @@ def main():
         else:
             st.info(f"No specific high-risk groups defined for {disease}")
         
-        # Run enhanced SIR simulation
-        if st.button("▶️ Run Enhanced SIR Simulation", type="primary"):
-            with st.spinner("Running comprehensive epidemiological simulation..."):
                 
-                # Run the enhanced model
-                sir_results = enhanced_sir.run_modified_sir_simulation(
-                    N, I0, R0, beta, gamma, delta, simulation_days, 
-                    disease, selected_interventions, vaccination_rate
+            # Run the enhanced model
+            sir_results = enhanced_sir.run_modified_sir_simulation(
+                N, I0, R0, beta, gamma, delta, simulation_days, 
+                disease, selected_interventions, vaccination_rate
+            )
+            
+            # Create comprehensive visualization
+            fig_enhanced = make_subplots(
+                rows=3, cols=2,
+                subplot_titles=(
+                    "Overall Population Dynamics", "High-Risk Groups Infection",
+                    "R-effective & Intervention Impact", "Hospital Burden & Capacity",
+                    "Vaccination Progress", "Mortality by Risk Group"
+                ),
+                specs=[[{"secondary_y": True}, {"type": "scatter"}],
+                       [{"type": "scatter"}, {"type": "scatter"}],
+                       [{"type": "scatter"}, {"type": "bar"}]]
+            )
+            
+            days_range = list(range(len(sir_results['S_general'])))
+            
+            # Plot 1: Overall population dynamics
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=sir_results['S_general'], 
+                name="Susceptible", line=dict(color='blue', width=3)
+            ), row=1, col=1)
+            
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=sir_results['I_general'], 
+                name="Infected", line=dict(color='red', width=3)
+            ), row=1, col=1)
+            
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=sir_results['R_general'], 
+                name="Recovered", line=dict(color='green', width=3)
+            ), row=1, col=1)
+            
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=sir_results['V_general'], 
+                name="Vaccinated", line=dict(color='purple', width=2, dash='dash')
+            ), row=1, col=1)
+            
+            # Plot 2: High-risk group infections
+            colors = ['darkred', 'orange', 'darkblue', 'darkgreen', 'purple']
+            for i, (group_name, infections) in enumerate(sir_results['I_risk'].items()):
+                fig_enhanced.add_trace(go.Scatter(
+                    x=days_range, y=infections,
+                    name=f"{group_name}", 
+                    line=dict(color=colors[i % len(colors)], width=2)
+                ), row=1, col=2)
+            
+            # Plot 3: R-effective over time
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range[1:], y=sir_results['r_effective'],
+                name="R-effective", line=dict(color='purple', width=3)
+            ), row=2, col=1)
+            fig_enhanced.add_hline(y=1, line_dash="dash", line_color="red", row=2, col=1)
+            
+            # Plot 4: Hospital burden
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=sir_results['hospital_burden'],
+                name="Hospital Beds Needed", line=dict(color='darkred', width=3)
+            ), row=2, col=2)
+            
+            # Hospital capacity line (assume 0.5% of population)
+            hospital_capacity = N * 0.005
+            fig_enhanced.add_hline(y=hospital_capacity, line_dash="dash", 
+                                 line_color="red", row=2, col=2, 
+                                 annotation_text="Hospital Capacity")
+            
+            # Plot 5: Vaccination progress
+            total_vaccinated = [sir_results['V_general'][i] + sum(
+                sir_results['V_risk'][group][i] for group in risk_groups
+            ) for i in range(len(days_range))]
+            
+            vaccination_percentage = [(v/N)*100 for v in total_vaccinated]
+            
+            fig_enhanced.add_trace(go.Scatter(
+                x=days_range, y=vaccination_percentage,
+                name="Vaccination %", line=dict(color='green', width=3)
+            ), row=3, col=1)
+            
+            # Herd immunity threshold
+            herd_immunity = (1 - 1/R_basic) * 100 if R_basic > 1 else 0
+            fig_enhanced.add_hline(y=herd_immunity, line_dash="dash", 
+                                 line_color="green", row=3, col=1,
+                                 annotation_text="Herd Immunity")
+            
+            # Plot 6: Mortality by risk group
+            final_deaths = [sir_results['D_general'][-1]]
+            death_labels = ['General Population']
+            
+            for group_name in risk_groups:
+                final_deaths.append(sir_results['D_risk'][group_name][-1])
+                death_labels.append(group_name)
+            
+            fig_enhanced.add_trace(go.Bar(
+                x=death_labels, y=final_deaths,
+                name="Final Deaths", marker_color='darkred'
+            ), row=3, col=2)
+            
+            fig_enhanced.update_layout(
+                height=1200, 
+                showlegend=True, 
+                title_text=f"Enhanced SIR Model Analysis - {disease} in {country}"
+            )
+            
+            st.plotly_chart(fig_enhanced, use_container_width=True)
+            
+            st.markdown("""
+            <div class="graph-explanation">
+            <strong>📊 Enhanced SIR Model Explanation:</strong> This comprehensive model shows disease progression 
+            across different population groups. Top row shows overall dynamics and high-risk group infections. 
+            Middle row displays R-effective trends and hospital burden vs capacity. Bottom row shows vaccination 
+            progress and mortality distribution across risk groups.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Enhanced analytics
+            st.markdown("### 📈 Comprehensive Model Analytics")
+            
+            analytics_col1, analytics_col2, analytics_col3, analytics_col4 = st.columns(4)
+            
+            with analytics_col1:
+                peak_infections = max(sir_results['I_general'])
+                peak_day = sir_results['I_general'].index(peak_infections)
+                st.metric("🔴 Peak Infections", f"{int(peak_infections):,}", f"Day {peak_day}")
+                
+                # Total infected across all groups
+                total_peak = peak_infections + sum(max(sir_results['I_risk'][group]) for group in risk_groups)
+                st.metric("🔴 Total Peak (All Groups)", f"{int(total_peak):,}")
+            
+            with analytics_col2:
+                final_attack_rate = (sir_results['total_cases'][-1] / N) * 100
+                st.metric("🎯 Final Attack Rate", f"{final_attack_rate:.1f}%")
+                
+                # Vaccination coverage at end
+                final_vacc_rate = (total_vaccinated[-1] / N) * 100
+                st.metric("💉 Final Vaccination Rate", f"{final_vacc_rate:.1f}%")
+            
+            with analytics_col3:
+                total_final_deaths = sir_results['D_general'][-1] + sum(
+                    sir_results['D_risk'][group][-1] for group in risk_groups
                 )
+                final_cfr = (total_final_deaths / sir_results['total_cases'][-1]) * 100 if sir_results['total_cases'][-1] > 0 else 0
+                st.metric("💀 Case Fatality Rate", f"{final_cfr:.2f}%")
                 
-                # Create comprehensive visualization
-                fig_enhanced = make_subplots(
-                    rows=3, cols=2,
-                    subplot_titles=(
-                        "Overall Population Dynamics", "High-Risk Groups Infection",
-                        "R-effective & Intervention Impact", "Hospital Burden & Capacity",
-                        "Vaccination Progress", "Mortality by Risk Group"
-                    ),
-                    specs=[[{"secondary_y": True}, {"type": "scatter"}],
-                           [{"type": "scatter"}, {"type": "scatter"}],
-                           [{"type": "scatter"}, {"type": "bar"}]]
-                )
+                # Hospital overflow days
+                overflow_days = sum(1 for burden in sir_results['hospital_burden'] if burden > hospital_capacity)
+                st.metric("🏥 Hospital Overflow Days", f"{overflow_days}")
+            
+            with analytics_col4:
+                min_r_eff = min(sir_results['r_effective']) if sir_results['r_effective'] else R_basic
+                st.metric("📉 Minimum R-effective", f"{min_r_eff:.2f}")
                 
-                days_range = list(range(len(sir_results['S_general'])))
-                
-                # Plot 1: Overall population dynamics
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=sir_results['S_general'], 
-                    name="Susceptible", line=dict(color='blue', width=3)
-                ), row=1, col=1)
-                
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=sir_results['I_general'], 
-                    name="Infected", line=dict(color='red', width=3)
-                ), row=1, col=1)
-                
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=sir_results['R_general'], 
-                    name="Recovered", line=dict(color='green', width=3)
-                ), row=1, col=1)
-                
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=sir_results['V_general'], 
-                    name="Vaccinated", line=dict(color='purple', width=2, dash='dash')
-                ), row=1, col=1)
-                
-                # Plot 2: High-risk group infections
-                colors = ['darkred', 'orange', 'darkblue', 'darkgreen', 'purple']
-                for i, (group_name, infections) in enumerate(sir_results['I_risk'].items()):
-                    fig_enhanced.add_trace(go.Scatter(
-                        x=days_range, y=infections,
-                        name=f"{group_name}", 
-                        line=dict(color=colors[i % len(colors)], width=2)
-                    ), row=1, col=2)
-                
-                # Plot 3: R-effective over time
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range[1:], y=sir_results['r_effective'],
-                    name="R-effective", line=dict(color='purple', width=3)
-                ), row=2, col=1)
-                fig_enhanced.add_hline(y=1, line_dash="dash", line_color="red", row=2, col=1)
-                
-                # Plot 4: Hospital burden
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=sir_results['hospital_burden'],
-                    name="Hospital Beds Needed", line=dict(color='darkred', width=3)
-                ), row=2, col=2)
-                
-                # Hospital capacity line (assume 0.5% of population)
-                hospital_capacity = N * 0.005
-                fig_enhanced.add_hline(y=hospital_capacity, line_dash="dash", 
-                                     line_color="red", row=2, col=2, 
-                                     annotation_text="Hospital Capacity")
-                
-                # Plot 5: Vaccination progress
-                total_vaccinated = [sir_results['V_general'][i] + sum(
-                    sir_results['V_risk'][group][i] for group in risk_groups
-                ) for i in range(len(days_range))]
-                
-                vaccination_percentage = [(v/N)*100 for v in total_vaccinated]
-                
-                fig_enhanced.add_trace(go.Scatter(
-                    x=days_range, y=vaccination_percentage,
-                    name="Vaccination %", line=dict(color='green', width=3)
-                ), row=3, col=1)
-                
-                # Herd immunity threshold
-                herd_immunity = (1 - 1/R_basic) * 100 if R_basic > 1 else 0
-                fig_enhanced.add_hline(y=herd_immunity, line_dash="dash", 
-                                     line_color="green", row=3, col=1,
-                                     annotation_text="Herd Immunity")
-                
-                # Plot 6: Mortality by risk group
-                final_deaths = [sir_results['D_general'][-1]]
-                death_labels = ['General Population']
-                
-                for group_name in risk_groups:
-                    final_deaths.append(sir_results['D_risk'][group_name][-1])
-                    death_labels.append(group_name)
-                
-                fig_enhanced.add_trace(go.Bar(
-                    x=death_labels, y=final_deaths,
-                    name="Final Deaths", marker_color='darkred'
-                ), row=3, col=2)
-                
-                fig_enhanced.update_layout(
-                    height=1200, 
-                    showlegend=True, 
-                    title_text=f"Enhanced SIR Model Analysis - {disease} in {country}"
-                )
-                
-                st.plotly_chart(fig_enhanced, use_container_width=True)
-                
-                st.markdown("""
-                <div class="graph-explanation">
-                <strong>📊 Enhanced SIR Model Explanation:</strong> This comprehensive model shows disease progression 
-                across different population groups. Top row shows overall dynamics and high-risk group infections. 
-                Middle row displays R-effective trends and hospital burden vs capacity. Bottom row shows vaccination 
-                progress and mortality distribution across risk groups.
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Enhanced analytics
-                st.markdown("### 📈 Comprehensive Model Analytics")
-                
-                analytics_col1, analytics_col2, analytics_col3, analytics_col4 = st.columns(4)
-                
-                with analytics_col1:
-                    peak_infections = max(sir_results['I_general'])
-                    peak_day = sir_results['I_general'].index(peak_infections)
-                    st.metric("🔴 Peak Infections", f"{int(peak_infections):,}", f"Day {peak_day}")
-                    
-                    # Total infected across all groups
-                    total_peak = peak_infections + sum(max(sir_results['I_risk'][group]) for group in risk_groups)
-                    st.metric("🔴 Total Peak (All Groups)", f"{int(total_peak):,}")
-                
-                with analytics_col2:
-                    final_attack_rate = (sir_results['total_cases'][-1] / N) * 100
-                    st.metric("🎯 Final Attack Rate", f"{final_attack_rate:.1f}%")
-                    
-                    # Vaccination coverage at end
-                    final_vacc_rate = (total_vaccinated[-1] / N) * 100
-                    st.metric("💉 Final Vaccination Rate", f"{final_vacc_rate:.1f}%")
-                
-                with analytics_col3:
-                    total_final_deaths = sir_results['D_general'][-1] + sum(
-                        sir_results['D_risk'][group][-1] for group in risk_groups
-                    )
-                    final_cfr = (total_final_deaths / sir_results['total_cases'][-1]) * 100 if sir_results['total_cases'][-1] > 0 else 0
-                    st.metric("💀 Case Fatality Rate", f"{final_cfr:.2f}%")
-                    
-                    # Hospital overflow days
-                    overflow_days = sum(1 for burden in sir_results['hospital_burden'] if burden > hospital_capacity)
-                    st.metric("🏥 Hospital Overflow Days", f"{overflow_days}")
-                
-                with analytics_col4:
-                    min_r_eff = min(sir_results['r_effective']) if sir_results['r_effective'] else R_basic
-                    st.metric("📉 Minimum R-effective", f"{min_r_eff:.2f}")
-                    
-                    # Days to control (R < 1)
-                    control_day = next((i for i, r in enumerate(sir_results['r_effective']) if r < 1), -1)
-                    if control_day > 0:
-                        st.metric("⏱️ Days to Control", f"{control_day}")
-                    else:
-                        st.metric("⏱️ Days to Control", "Not Achieved")
-                
-                # High-risk group analysis
-                if risk_groups:
-                    st.markdown("### 👥 High-Risk Group Impact Analysis")
-                    
-                    risk_analysis_data = []
-                    for group_name, group_data in risk_groups.items():
-                        group_deaths = sir_results['D_risk'][group_name][-1]
-                        group_infected = max(sir_results['I_risk'][group_name])
-                        
-                        risk_analysis_data.append({
-                            'Risk Group': group_name,
-                            'Peak Infections': f"{int(group_infected):,}",
-                            'Total Deaths': f"{int(group_deaths):,}",
-                            'Group CFR': f"{(group_deaths / max(1, group_infected)) * 100:.1f}%",
-                            'Population %': f"{group_data['proportion']*100:.1f}%"
-                        })
-                    
-                    df_risk_analysis = pd.DataFrame(risk_analysis_data)
-                    st.dataframe(df_risk_analysis, use_container_width=True)
-                
-                # Policy recommendations based on model
-                st.markdown("### 🎯 AI-Generated Policy Recommendations")
-                
-                if effective_r0 > 1.5:
-                    st.markdown('<div class="alert-card">🚨 CRITICAL: Immediate aggressive intervention required</div>', unsafe_allow_html=True)
-                    recommendations = [
-                        "Implement immediate lockdown measures",
-                        "Surge hospital capacity preparation",
-                        "Accelerate vaccination for high-risk groups",
-                        "Enhance contact tracing and testing",
-                        "Public emergency communication"
-                    ]
-                elif effective_r0 > 1.0:
-                    st.markdown('<div class="risk-medium">⚠️ MODERATE: Enhanced measures needed</div>', unsafe_allow_html=True)
-                    recommendations = [
-                        "Strengthen social distancing measures",
-                        "Increase vaccination coverage",
-                        "Monitor high-risk groups closely",
-                        "Prepare healthcare system",
-                        "Public awareness campaigns"
-                    ]
+                # Days to control (R < 1)
+                control_day = next((i for i, r in enumerate(sir_results['r_effective']) if r < 1), -1)
+                if control_day > 0:
+                    st.metric("⏱️ Days to Control", f"{control_day}")
                 else:
-                    st.markdown('<div class="risk-low">✅ CONTROLLED: Maintain current strategy</div>', unsafe_allow_html=True)
-                    recommendations = [
-                        "Continue current interventions",
-                        "Monitor for variants/resurgence",
-                        "Focus on vaccination completion",
-                        "Prepare for seasonal changes",
-                        "Maintain surveillance systems"
-                    ]
+                    st.metric("⏱️ Days to Control", "Not Achieved")
+            
+            # High-risk group analysis
+            if risk_groups:
+                st.markdown("### 👥 High-Risk Group Impact Analysis")
                 
-                for i, rec in enumerate(recommendations, 1):
-                    st.markdown(f"{i}. {rec}")
+                risk_analysis_data = []
+                for group_name, group_data in risk_groups.items():
+                    group_deaths = sir_results['D_risk'][group_name][-1]
+                    group_infected = max(sir_results['I_risk'][group_name])
+                    
+                    risk_analysis_data.append({
+                        'Risk Group': group_name,
+                        'Peak Infections': f"{int(group_infected):,}",
+                        'Total Deaths': f"{int(group_deaths):,}",
+                        'Group CFR': f"{(group_deaths / max(1, group_infected)) * 100:.1f}%",
+                        'Population %': f"{group_data['proportion']*100:.1f}%"
+                    })
                 
-                # Save comprehensive model results
-                model_data = {
-                    'disease': disease,
-                    'country': country,
-                    'basic_r0': R_basic,
-                    'effective_r0': effective_r0,
-                    'interventions': ', '.join(selected_interventions),
-                    'peak_infections': int(peak_infections),
-                    'peak_day': peak_day,
-                    'final_attack_rate': final_attack_rate,
-                    'final_cfr': final_cfr,
-                    'total_deaths': int(total_final_deaths),
-                    'hospital_overflow_days': overflow_days,
-                    'vaccination_rate': vaccination_rate * 100,
-                    'simulation_days': simulation_days,
-                    'high_risk_groups': len(risk_groups),
-                    'transmission_reduction': reduction_percent,
-                    'intervention_cost': total_cost
-                }
-                
-                st.session_state.csv_manager.add_model_result(model_data)
-                
-                st.success("✅ Model results saved to CSV storage")
-    
+                df_risk_analysis = pd.DataFrame(risk_analysis_data)
+                st.dataframe(df_risk_analysis, use_container_width=True)
+            
+            # Policy recommendations based on model
+            st.markdown("### 🎯 AI-Generated Policy Recommendations")
+            
+            if effective_r0 > 1.5:
+                st.markdown('<div class="alert-card">🚨 CRITICAL: Immediate aggressive intervention required</div>', unsafe_allow_html=True)
+                recommendations = [
+                    "Implement immediate lockdown measures",
+                    "Surge hospital capacity preparation",
+                    "Accelerate vaccination for high-risk groups",
+                    "Enhance contact tracing and testing",
+                    "Public emergency communication"
+                ]
+            elif effective_r0 > 1.0:
+                st.markdown('<div class="risk-medium">⚠️ MODERATE: Enhanced measures needed</div>', unsafe_allow_html=True)
+                recommendations = [
+                    "Strengthen social distancing measures",
+                    "Increase vaccination coverage",
+                    "Monitor high-risk groups closely",
+                    "Prepare healthcare system",
+                    "Public awareness campaigns"
+                ]
+            else:
+                st.markdown('<div class="risk-low">✅ CONTROLLED: Maintain current strategy</div>', unsafe_allow_html=True)
+                recommendations = [
+                    "Continue current interventions",
+                    "Monitor for variants/resurgence",
+                    "Focus on vaccination completion",
+                    "Prepare for seasonal changes",
+                    "Maintain surveillance systems"
+                ]
+            
+            for i, rec in enumerate(recommendations, 1):
+                st.markdown(f"{i}. {rec}")
+            
+            # Save comprehensive model results
+            model_data = {
+                'disease': disease,
+                'country': country,
+                'basic_r0': R_basic,
+                'effective_r0': effective_r0,
+                'interventions': ', '.join(selected_interventions),
+                'peak_infections': int(peak_infections),
+                'peak_day': peak_day,
+                'final_attack_rate': final_attack_rate,
+                'final_cfr': final_cfr,
+                'total_deaths': int(total_final_deaths),
+                'hospital_overflow_days': overflow_days,
+                'vaccination_rate': vaccination_rate * 100,
+                'simulation_days': simulation_days,
+                'high_risk_groups': len(risk_groups),
+                'transmission_reduction': reduction_percent,
+                'intervention_cost': total_cost
+            }
+            
+            st.session_state.csv_manager.add_model_result(model_data)
+            
+            st.success("✅ Model results saved to CSV storage")
+
     # CSV Download Section
     st.markdown("---")
     st.markdown("## 📥 Data Export & Management")
@@ -2469,3 +2466,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
