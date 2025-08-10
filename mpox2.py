@@ -1517,17 +1517,51 @@ def main():
         # Historical trends and AI predictions
         st.markdown("### 📈 Historical Trends & AI Predictions")
         
-        # Generate historical data
-        ai_predictor = AIPredictor()
-        historical_data = ai_predictor.generate_historical_data(current_data, 120)
+        # Fetch real historical data from API
+    try:
+        # Get historical data from disease.sh API
+        country_config = COUNTRY_CONFIG.get(country, COUNTRY_CONFIG["Global"])
+        api_code = country_config["api_code"]
         
-        # Generate AI predictions
-        disease_params = DISEASE_CONFIG.get(disease, DISEASE_CONFIG["COVID-19"])
-        future_predictions = ai_predictor.predict_future_trend(historical_data[-60:], 30, disease_params)
+        if disease == "COVID-19":
+            if api_code == "all":
+                historical_url = "https://disease.sh/v3/covid-19/historical/all?lastdays=120"
+            else:
+                historical_url = f"https://disease.sh/v3/covid-19/historical/{api_code}?lastdays=120"
+            
+            response = requests.get(historical_url, timeout=10)
+            
+            if response.status_code == 200:
+                hist_data = response.json()
+                if api_code == "all":
+                    cases_data = hist_data.get("cases", {})
+                else:
+                    cases_data = hist_data.get("timeline", {}).get("cases", {})
+                
+                # Convert to list of daily cases
+                historical_data = list(cases_data.values())[-120:] if cases_data else []
+                
+                # Calculate daily new cases from cumulative
+                if len(historical_data) > 1:
+                    daily_cases = [historical_data[0]]
+                    for i in range(1, len(historical_data)):
+                        daily_new = max(0, historical_data[i] - historical_data[i-1])
+                        daily_cases.append(daily_new)
+                    historical_data = daily_cases
+            else:
+                raise Exception("API call failed")
         
-        # Create visualization
-        fig = go.Figure()
-        
+        else:
+            # For non-COVID diseases, generate realistic data
+            historical_data = AIPredictor.generate_historical_data(current_data, 120)
+            
+    except Exception as e:
+        st.warning(f"Using simulated historical data: {str(e)}")
+        historical_data = AIPredictor.generate_historical_data(current_data, 120)
+
+# Generate AI predictions
+disease_params = DISEASE_CONFIG.get(disease, DISEASE_CONFIG["COVID-19"])
+future_predictions = AIPredictor.predict_future_trend(historical_data[-60:], 30, disease_params)
         # Historical data
         dates_hist = [datetime.now() - timedelta(days=120-i) for i in range(120)]
         fig.add_trace(go.Scatter(
@@ -2685,6 +2719,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
